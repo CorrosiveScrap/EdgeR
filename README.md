@@ -29,8 +29,8 @@ EdgeR is fetishware that continuously spammes the user with image, video, and au
 
 
 # Downloads
-> - [v0.8.3 - Zip](https://github.com/700Maps/EdgeR/releases/download/V0.8.3-beta/EdgeR.-.V0.8.3.zip)
-> - [v0.8.3 - Source code](https://github.com/700Maps/EdgeR/archive/refs/tags/V0.8.3-beta.zip)
+> - [v0.8.4 - Zip](https://github.com/700Maps/EdgeR/releases/download/V0.8.3-beta/EdgeR.v0.8.4.zip)
+> - [v0.8.4 - Source code](https://github.com/700Maps/EdgeR/archive/refs/tags/V0.8.3-beta.zip)
 
 
 
@@ -48,6 +48,8 @@ EdgeR is under the [MIT licence](https://github.com/700Maps/EdgeR/blob/main/LICE
 
 # Versions
 
+**V0.8.4**
+> - Fixed the tray icon not loading
 
 **V0.8.3 - Shapeshift**
 > - Close button can now be disabled
