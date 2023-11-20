@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css" type="text/css">
+
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        img {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100px;
+            height: 100px;
+            z-index: -2;
+        }
+
+        .cover {
+            background-color: grey;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100px;
+            height: 100px;
+            opacity: 20%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1>Locked out 🩷</h1>
+        <img id="background" src="" alt="Failed to load image" style="color: white;">
+        <div id="bgBlur" class="cover"></div>
+
+        <button onclick="closeWindow()">Close</button>
+    </center>
+
+    <script>
+
+        const images = JSON.parse(localStorage.getItem('storage_images'))
+        const folderPath = localStorage.getItem('storage_images_path')
+        const rng = Math.floor(Math.random() * images.length);
+        const imageUrl = `file://${folderPath}\\${images[rng]}`;
+        const imageElement = document.getElementById('background');
+        imageElement.src = imageUrl;
+
+        document.getElementById('background').style.width = window.innerWidth + 'px'
+        document.getElementById('background').style.height = window.innerHeight + 'px'
+
+        document.getElementById('bgBlur').style.width = window.innerWidth + 'px'
+        document.getElementById('bgBlur').style.height = window.innerHeight + 'px'
+
+
+        function closeWindow() {
+            window.close();
+        }
+
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key == 'p') {
+                closeWindow()
+            }
+        })
+    </script>
+</body>
+</html>

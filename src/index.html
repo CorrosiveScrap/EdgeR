@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeR Home</title>
+    <link rel="stylesheet" href="main.css" type="text/css">
+
+    <style>
+        body {
+            background-image: url('img/indexBackground.png');
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            cursor: default;
+        }
+
+        button {
+            cursor: pointer;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color: #cbcbcb;
+            border: 2px solid black;
+            width: 200px;
+            height: 75px;
+            font-size: 25px;
+            border-radius: 10px;
+        }
+
+        .slider {
+            width: 35%;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body onload="loadPrefrences()">
+    <center>
+        <div style="background-color: rgba(0, 0, 0, 0.524); position: fixed; top: 0; left: 0; height: 100%; width: 100%; z-index: -5;"></div>
+    </center>
+    <div id="Home" class="">
+        <center>
+            <div style="font-size: 73px; text-shadow: 2px 2px 10px #000000;" id="inhome">EdgeR</div> <br><br>
+            <button onclick="destroy()" id="start">Start</button> <br><br>
+            <button onclick="swapPage(this), loadSliders()">Preferences</button> <br><br>
+            <button id="swapbutton" onclick="swapPage(this), loadResaurcePaths()">Swap material</button> <br><br>
+            <button onclick="swapPage(this)">Extra</button> <br><br>
+            <button id="closeApp">Quit</button>
+            
+<!--
+            <br><br><br> <br><br> <button id="test">Test</button>
+-->
+
+            <br><br>
+            &copy; 700Maps
+        </center>
+    </div>
+
+    <div id="Preferences" style="text-shadow: 2px 2px 10px black;" class="hidden">
+        <center>
+            <div style="font-size: 63px;"><b>Preferences</b></div><br>
+            <form align="left" style="margin-left: 35%;">
+                <details>
+                    <summary style="font-size: 22px; cursor: pointer;" title="Edit the amount and frequency of popups">Popup creation</summary>
+                    <br>
+                    Create images <input type="checkbox" id="willCreateImages" checked> <br>
+                    Create videos <input type="checkbox" id="willCreateVideos"> <br>
+                    Create audio <input type="checkbox" id="willCreateAudio"> <br>
+                    <br>
+
+
+                    Create all <input type="radio" name="createAmountOfMedia" id="createAll" value="" checked> <br>
+                    Create one <input type="radio" name="createAmountOfMedia" id="createOne" value=""> <br>
+                    Create amount <input type="radio" name="createAmountOfMedia" id="createAmount" value=""> <br>
+                    <br>
+                    Amount created <input type="number" id="creationAmount" style="width: 35px;" placeholder="5">
+                    <br><br>
+
+                    <!--Find me-->
+                    Minimum size <input type="number" id="popupMinSize" style="width: 50px;" placeholder="300"> <br>
+                    Maximum size <input type="number" id="popupMaxSize" style="width: 50px;" placeholder="700">
+                    <br><br>
+
+                    Windows fade <input id="doesWindowFade" type="checkbox"> <br>
+                    <br>
+                    Windows fade after <input type="number" id="fadeTimeInput" placeholder="60" style="width: 50px;" onblur="loadSliders()"> seconds<br>
+                    <input class="slider" id="fadeslider" type="range" min="1" max="120" value="60" class="slider" oninput="document.getElementById('fadeTimeInput').value = this.value">
+                    <br><br><br>
+
+                    Random popup time <input id="frequencyToggle" type="checkbox" onclick="changeFrequency()"><br><br>
+
+                    <div id="frequencyOption01" style="display: none;">
+                    Popups apear every <input type="number" id="frequency" placeholder="5" style="width: 50px;" onblur="loadSliders()"> seconds<br>
+                    <input class="slider" id="frequencyslider" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency').value = this.value">
+                    </div>
+
+                    <div id="frequencyOption02" style="display: none;">
+                    Popups apear every <input type="number" id="frequency02" placeholder="5" style="width: 50px;" onblur="loadSliders()"> to 
+                    <input type="number" id="frequency03" placeholder="5" style="width: 50px;" onblur="loadSliders()"> seconds<br>
+                    <input class="slider" id="frequencyslider02" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency02').value = this.value">
+                    <input class="slider" id="frequencyslider03" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency03').value = this.value">
+                    </div>
+
+                </details>
+                <br>
+                <details>
+                    <summary style="font-size: 22px;" title="Enable and edit things that are overlayed on popups">Edit media</summary>
+                    <br>
+                    Disable close button <input id="closeToggle" type="checkbox"><br><br>
+                    Close button text <input type="text" id="closeButtonTextInput" style="width: 100px;" placeholder="I submit <3"> <br>
+                    Close button location 
+                    <select id="closeButtonLocation">
+                        <option>Bottom right</option>
+                        <option>Bottom left</option>
+                        <option>Top right</option>
+                        <option>Top left</option>
+                    </select>
+                    <br><br>
+                    Display captions <input type="checkbox" id="willCreateCaptions"><br><br>
+                    <button type="button" id="opencaptioneditor" style="width: 150px; height: 30px; font-size: 15px;">Open caption editor</button> 
+                    <br><br>
+                    Style captions: <br>
+                    Text color <input type="text" id="cap_textcolor" style="width: 100px;" placeholder="white"> <br>
+                    Text size <input type="text" id="cap_textsize" style="width: 100px;" placeholder="22px"> <br>
+                    Font family <input type="text" id="cap_font" style="width:fit-content;" placeholder="'Courier New', Courier, monospace"> <br>
+                    Text shadow <input type="text" id="cap_textshadow" style="width: 150px;" placeholder="black 2px 2px"> <br>
+                    Text align <input type="text" id="cap_align" style="width: 100px;" placeholder="center"> <br>
+                    Text placement 
+                    <select id="cap_placement">
+                        <option>Top</option>
+                        <option>Bottom</option>
+                    </select><br>
+                    Bold <input type="checkbox" id="cap_bold"><br>
+                    Italic <input type="checkbox" id="cap_italic">
+                    <br>
+                    <br>
+                    <br>
+                        Loop audio <input type="checkbox" id="audioLoop"> <br>
+                        Hide audio windows <input type="checkbox" id="audioHide"> <br>
+                        Show default image on audio windows <input type="radio" name="audioWindowContent" checked> <br>
+                        Show images on audio windows <input type="radio" name="audioWindowContent"> <br>
+                        Show videos on audio windows <input type="radio" name="audioWindowContent"> <br>
+                        <br>
+                        Mute videos <input type="checkbox" id="videosMuted" checked> <br>
+                        Videos loop <input name="handleVideoEnd" id="videoLoop" type="radio" checked> <br>
+                        Videos change after play <input name="handleVideoEnd" id="videoChange" type="radio"> <br>
+                        Videos close after play <input name="handleVideoEnd" id="videoClose" type="radio"> <br>
+                        <br>
+                </details>
+                <!--
+                <br>
+                <details>
+                    <summary style="font-size: 22px;">Lock options</summary>
+
+                    <br>
+                    Disable close button <input type="checkbox"> <br>
+                    Disable freezing <input type="checkbox"> <br>
+                    <br>
+                    Require password to reopen preferences <input type="checkbox"> <br>
+                    Require password to quit app <input type="checkbox"> <br>
+                    <br>
+                    Show password <input type="checkbox"> <br>
+                    Set password <input style="width: 100px;" type="password" placeholder="password">
+                    
+                </details>
+                <br>
+                <details>
+                    <summary style="font-size: 22px; cursor: pointer;" title="Much more control over how you lose control">More control</summary>
+                    <br>
+                    Lock PC based on time<input type="checkbox"> <br>
+                    Lock out time <input type="text" placeholder="20:00" style="width: 40px;"> to <input type="text" placeholder="7:00" style="width: 40px;"><br>
+                    <br>
+                    Lock PC after amount of time pased<input type="checkbox"> <br>
+                    Time before lock out <input type="text" placeholder="4" style="width: 30px;"> hours <br>
+                    Reset at <input type="text" placeholder="7:00" style="width: 40px;"><br>
+                </details>
+                -->
+                <br>
+                <details>
+                    <summary style="font-size: 22px; cursor: pointer;" title="General quality of life">Prefrence settings</summary>
+                    <br>
+                    Time is counted in miliseconds <input type="checkbox" id="countInMs"> <br>
+                    (This does not apply to fade time)
+                </details>
+                <br>
+                <details>
+                    <summary style="font-size: 22px; cursor: pointer;" title="Customize the was edger looks on discord">Discord rich presence</summary>
+                    <br>
+                    Show on discord <input type="checkbox" id="showOnDiscord"> <br>
+                    Details: <input type="text" placeholder="Default details" id="detailsText"> <input type="checkbox" id="detailsToggle"> <br>
+                    State: <input type="text" placeholder="Default state" id="stateText"> <input type="checkbox" id="stateToggle">
+
+                    <p>*Discord settings are still buggy <br> Its very unlikely they will work 100% of the time</p>
+                </details>
+
+            </form>
+
+            <br><br>
+            <button id="sendSettings" style="width: 150px; height: 50px;" onclick="home(), savePrefrences()">Save</button> <br><br>
+            <button style="width: 150px; height: 50px;" onclick="home(), loadPrefrences()">cancel</button>
+        </center>
+    </div>
+
+    <div id="Swap material" class="hidden">
+        <center>
+            <h1 style="font-size: 63px;">Change resources</h1>
+
+            Image folder<br>
+            <button id="choose-image-folder" style="height: 30px; width: 120px; font-size: 15px;">Choose folder</button> <input style="width: 200px;" readonly type="text" id="imageFilePath" placeholder="The folder in use will apear here"> 
+            <br><br>
+            Video folder<br>
+            <button id="choose-video-folder" style="height: 30px; width: 120px; font-size: 15px;">Choose folder</button> <input style="width: 200px;" readonly type="text" id="videoFilePath" placeholder="The folder in use will apear here">
+            <br><br>
+            Audio folder<br>
+            <button id="choose-audio-folder" style="height: 30px; width: 120px; font-size: 15px;">Choose folder</button> <input style="width: 200px;" readonly type="text" id="audioFilePath" placeholder="The folder in use will apear here">
+            <br><br>
+            <button onclick="saveResaurcePaths()">Save</button>
+            <br><br>
+            <details>
+                <Summary>How to use</Summary>
+                <p>
+                    1: Click on the <b>choose folder</b> button to bring up the file explorer <br>
+                    2: Click on the folder that contains whatever you want displayed on the popups<br>
+                    3: Click select folder in the bottom right <br><br>
+                    Tip: Make sure that the folder you select contains the correct type of material. If there is no readable files in the folder you select a notification will apear and the progream will keep using whatever files it had previusly.
+                </p>
+            </details>
+        </center>
+    </div>
+
+    <div id="Extra" class="hidden">
+        <center>
+            <h1 style="font-size: 63px;">Extra</h1>
+            <a href="https://github.com/700Maps/EdgeR" target="_blank">EdgeR Github</a> <br><br>
+            <a href="versions.html" target="_blank">Version hystory</a> <br><br>
+            <a href="https://twitter.com/700mps" target="_blank" title="I fucking hate that I have to refer to this website as X">My twitter / X</a> <br><br>
+            <br>
+            <button onclick="home()">Back</button>
+        </center>
+    </div>
+
+    <script>
+        //Change between sections in the splash screen
+        function swapPage(obj) {
+            document.getElementById('Home').classList.add("hidden");
+            document.getElementById('Preferences').classList.add("hidden");
+            document.getElementById('Swap material').classList.add("hidden");
+            document.getElementById('Extra').classList.add("hidden");
+
+            document.getElementById(obj.innerHTML).classList.remove("hidden");
+        }
+        function home() {
+            document.getElementById('Home').classList.remove("hidden");
+            document.getElementById('Preferences').classList.add("hidden");
+            document.getElementById('Swap material').classList.add("hidden");
+            document.getElementById('Extra').classList.add("hidden");
+        }
+
+
+        // Change the background color of buttons then you hover over them by adding and removing a class
+        let btns = document.querySelectorAll('button');
+
+        for (i of btns) {
+        i.addEventListener('mouseover', function() {
+            this.classList.add("highlight")
+        });
+        i.addEventListener('mouseout', function() {
+            this.classList.remove("highlight")
+        });
+        }
+
+
+        // Stop negative numbers and numbers that are larger than 99 from being used
+        document.getElementById('creationAmount').addEventListener('input', function(event) {
+            if (document.getElementById('creationAmount').value.length > 2) {
+                document.getElementById('creationAmount').value = document.getElementById('creationAmount').value.slice(0, 2);
+            }
+            if (document.getElementById('creationAmount').value < 1) {
+                document.getElementById('creationAmount').value = 99
+            }
+        });
+
+
+
+
+
+        // Save and load prefrences with local storage
+        function savePrefrences() {
+
+            //Popup creation
+            localStorage.setItem('storage_frequency', document.getElementById('frequency').value);
+
+            if (document.getElementById('fadeTimeInput').value == '') {
+                localStorage.setItem('storage_fadetime', 60);
+            } else {
+                localStorage.setItem('storage_fadetime', document.getElementById('fadeTimeInput').value);
+            }
+
+            if (document.getElementById('createAll').checked == true) {
+                localStorage.setItem('storage_creationType', JSON.stringify(3))
+            } else if (document.getElementById('createOne').checked == true) {
+                localStorage.setItem('storage_creationType', JSON.stringify(1));
+            } else if (document.getElementById('createAmount').checked == true && document.getElementById('creationAmount').value) {
+                localStorage.setItem('storage_creationType', JSON.stringify(document.getElementById('creationAmount').value));
+            } else {
+                localStorage.setItem('storage_creationType', JSON.stringify(5));
+            }
+
+            if (document.getElementById('creationAmount').value) {
+                localStorage.setItem('storage_amountOfPopupsDisplay', document.getElementById('creationAmount').value)
+            }
+
+
+            if (document.getElementById('doesWindowFade').checked) {
+                doesfade = true
+            } else {
+                doesfade = false
+            }
+            localStorage.setItem('storage_ifFade', doesfade);
+
+            if (document.getElementById('willCreateImages').checked) {
+                imgs = true
+            } else {
+                imgs = false
+            }
+            localStorage.setItem('storage_typeOfMedia0', imgs);
+
+            if (document.getElementById('willCreateVideos').checked) {
+                vids = true
+            } else {
+                vids = false
+            }
+            localStorage.setItem('storage_typeOfMedia1', vids);
+
+            if (document.getElementById('willCreateAudio').checked) {
+                audis = true
+            } else {
+                audis = false
+            }
+            localStorage.setItem('storage_typeOfMedia2', audis);
+
+
+            if (document.getElementById('frequencyToggle').checked) {
+                ftog = true
+            } else {
+                ftog = false
+            }
+            localStorage.setItem('storage_typeOfFrequency', ftog);
+
+
+            //find me
+
+            if (document.getElementById('popupMinSize').value) {
+                JSON.stringify(localStorage.setItem('storage_minimumPopupSize', document.getElementById('popupMinSize').value))
+            } else {
+                JSON.stringify(localStorage.setItem('storage_minimumPopupSize', 300))
+            }
+
+            if (document.getElementById('popupMaxSize').value) {
+                JSON.stringify(localStorage.setItem('storage_maximumPopupSize', document.getElementById('popupMaxSize').value))
+            } else {
+                JSON.stringify(localStorage.setItem('storage_maximumPopupSize', 700))
+            }
+
+
+
+            //Edit media
+            if (document.getElementById('closeButtonTextInput').value == '') {
+                localStorage.setItem('storage_closeText', "I submit <3")
+            } else {
+                localStorage.setItem('storage_closeText', document.getElementById('closeButtonTextInput').value)
+            }
+
+            if (document.getElementById('closeToggle').checked) {
+                cls = true
+            } else {
+                cls = false
+            }
+            localStorage.setItem('storage_closeAbilitie', cls);
+
+            localStorage.setItem('storage_closeLocation', document.getElementById('closeButtonLocation').value)
+
+            if (document.getElementById('willCreateCaptions').checked) {
+                caps = true
+            } else {
+                caps = false
+            }
+            localStorage.setItem('storage_displayCaptions', caps);
+
+            localStorage.setItem('storage_captionColor', document.getElementById('cap_textcolor').value);
+            localStorage.setItem('storage_captionSize', document.getElementById('cap_textsize').value);
+            localStorage.setItem('storage_captionFont', document.getElementById('cap_font').value);
+            localStorage.setItem('storage_captionShadow', document.getElementById('cap_textshadow').value);
+            localStorage.setItem('storage_captionAlign', document.getElementById('cap_align').value);
+            localStorage.setItem('storage_captionPlacement', document.getElementById('cap_placement').value);
+
+            if (document.getElementById('cap_bold').checked) {
+                boldcap = true
+            } else {
+                boldcap = false
+            }
+            localStorage.setItem('storage_boldcaps', boldcap);
+
+            if (document.getElementById('cap_italic').checked) {
+                italcap = true
+            } else {
+                italcap = false
+            }
+            localStorage.setItem('storage_italcaps', italcap);
+
+            if (document.getElementById('videoLoop').checked == true) {
+                vidEndOpt = 'loop'
+            } else if (document.getElementById('videoChange').checked == true) {
+                vidEndOpt = 'change'
+            } else if (document.getElementById('videoClose').checked == true) {
+                vidEndOpt = 'close'
+            }
+            localStorage.setItem('storage_videoEndOption', vidEndOpt);
+
+
+            if (document.getElementById('videosMuted').checked == true) {
+                mutevid = true
+            } else {
+                mutevid = false
+            }
+            localStorage.setItem('storage_isVideoMuted', mutevid);
+
+            if (document.getElementById('audioLoop').checked == true) {
+                loopaudi = true
+            } else {
+                loopaudi = false
+            }
+            localStorage.setItem('storage_isAudioLooped', loopaudi);
+
+
+            if (document.getElementById('audioHide').checked == true) {
+                hideaudi = true
+            } else {
+                hideaudi = false
+            }
+            localStorage.setItem('storage_isAudioHidden', hideaudi);
+
+
+            //QOL
+            if (document.getElementById('countInMs').checked) {
+                usems = true
+            } else {
+                usems = false
+            }
+            localStorage.setItem('storage_countType', usems);
+
+
+
+            //Rich presence
+            if (document.getElementById('showOnDiscord').checked) {
+                showOndis = true
+            } else {
+                showOndis = false
+            }
+            localStorage.setItem('storage_ifdiscord', showOndis);
+
+            if (document.getElementById('detailsToggle').checked) {
+                detaislOn = true
+            } else {
+                detaislOn = false
+            }
+            localStorage.setItem('storage_usingDiscordDetails', detaislOn);
+
+            if (document.getElementById('stateToggle').checked) {
+                stateOn = true
+            } else {
+                stateOn = false
+            }
+            localStorage.setItem('storage_usingDiscordState', stateOn);
+
+            localStorage.setItem('storage_detailsText', document.getElementById('detailsText').value)
+            localStorage.setItem('storage_stateText', document.getElementById('stateText').value)
+
+            console.log('Prefrences saved')
+        }
+        function loadPrefrences() {
+            document.getElementById('frequency').value = localStorage.getItem('storage_frequency');
+            document.getElementById('frequency02').value = localStorage.getItem('storage_frequency02');
+            document.getElementById('frequency03').value = localStorage.getItem('storage_frequency03');
+            document.getElementById('fadeTimeInput').value = localStorage.getItem('storage_fadetime');
+            document.getElementById('closeButtonTextInput').value = localStorage.getItem('storage_closeText')
+
+            if (localStorage.getItem('storage_ifFade') == 'true') {
+                document.getElementById('doesWindowFade').checked = true;
+            }
+
+            if (localStorage.getItem('storage_ifdiscord') == 'true') {
+                document.getElementById('showOnDiscord').checked = true;
+            }
+
+            if (localStorage.getItem('storage_typeOfMedia0') == 'true') {
+                document.getElementById('willCreateImages').checked = true;
+            } else if (localStorage.getItem('storage_typeOfMedia1') == 'true' || localStorage.getItem('storage_typeOfMedia2') == 'true') {
+                document.getElementById('willCreateImages').checked = false;
+            }
+
+            if (localStorage.getItem('storage_typeOfMedia1') == 'true') {
+                document.getElementById('willCreateVideos').checked = true;
+            }
+
+            if (localStorage.getItem('storage_typeOfMedia2') == 'true') {
+                document.getElementById('willCreateAudio').checked = true;
+            }
+
+            if (localStorage.getItem('storage_countType') == 'true') {
+                document.getElementById('countInMs').checked = true;
+            }
+
+            if (localStorage.getItem('storage_closeAbilitie') == 'true') {
+                document.getElementById('closeToggle').checked = true;
+            }
+
+            if (localStorage.getItem('storage_typeOfFrequency') == 'true') {
+                document.getElementById('frequencyToggle').checked = true;
+                document.getElementById('frequencyOption02').style.display = 'block'
+            } else {
+                document.getElementById('frequencyOption01').style.display = 'block'
+            }
+
+
+            if (localStorage.getItem('storage_closeLocation')) {
+                document.getElementById('closeButtonLocation').value = localStorage.getItem('storage_closeLocation')
+            }
+
+            if (localStorage.getItem('storage_displayCaptions')) {
+                document.getElementById('willCreateCaptions').checked = true
+            }
+
+            if (localStorage.getItem('storage_captionColor')) {
+                document.getElementById('cap_textcolor').value = localStorage.getItem('storage_captionColor')
+            }
+            if (localStorage.getItem('storage_captionSize')) {
+                document.getElementById('cap_textsize').value = localStorage.getItem('storage_captionSize')
+            }
+            if (localStorage.getItem('storage_captionFont')) {
+                document.getElementById('cap_font').value = localStorage.getItem('storage_captionFont')
+            }
+            if (localStorage.getItem('storage_captionShadow')) {
+                document.getElementById('cap_textshadow').value = localStorage.getItem('storage_captionShadow')
+            }
+            if (localStorage.getItem('storage_captionAlign')) {
+                document.getElementById('cap_align').value = localStorage.getItem('storage_captionAlign')
+            }
+
+            if (localStorage.getItem('storage_captionPlacement')) {
+                    document.getElementById('cap_placement').value = localStorage.getItem('storage_captionPlacement')
+            }
+
+            if (localStorage.getItem('storage_boldcaps') == 'true') {
+                document.getElementById('cap_bold').checked = true
+            }
+
+            if (localStorage.getItem('storage_italcaps') == 'true') {
+                document.getElementById('cap_italic').checked = true
+            }
+
+            if (localStorage.getItem('storage_videoEndOption')) {
+                console.log('sd')
+                document.getElementById('videoLoop').checked = false
+                switch(localStorage.getItem('storage_videoEndOption')) {
+                    case "loop":
+                        document.getElementById('videoLoop').checked = true
+                        console.log('1')
+                    break;
+                    case "change":
+                        document.getElementById('videoChange').checked = true
+                        console.log('2')
+                    break;
+                    case "close":
+                        document.getElementById('videoClose').checked = true
+                        console.log('3')
+                    break;
+                }
+            }
+
+
+            if (localStorage.getItem('storage_creationType')) {
+                document.getElementById('createAll').checked = false
+                switch(localStorage.getItem('storage_creationType')) {
+                    case "3":
+                        document.getElementById('createAll').checked = true
+                    break;
+                    case "1":
+                        document.getElementById('createOne').checked = true
+                    break;
+                    default:
+                        document.getElementById('createAmount').checked = true
+                    break;
+                }
+            }
+
+            if (localStorage.getItem('storage_amountOfPopupsDisplay')) {
+                document.getElementById('creationAmount').value = localStorage.getItem('storage_amountOfPopupsDisplay')
+            }
+
+            if (localStorage.getItem('storage_isVideoMuted') == 'true') {
+                document.getElementById('videosMuted').checked = true
+            } else {
+                document.getElementById('videosMuted').checked = false
+            }
+
+            if (localStorage.getItem('storage_isAudioLooped') == 'true') {
+                document.getElementById('audioLoop').checked = true
+            }
+
+            if (localStorage.getItem('storage_isAudioHidden') == 'true') {
+                document.getElementById('audioHide').checked = true
+            }
+
+            if (localStorage.getItem('storage_detailsText')) {
+                document.getElementById('detailsText').value = localStorage.getItem('storage_detailsText')
+            }
+
+            if (localStorage.getItem('storage_stateText')) {
+                document.getElementById('stateText').value = localStorage.getItem('storage_stateText')
+            }
+
+            if (localStorage.getItem('storage_usingDiscordDetails') == 'true') {
+                document.getElementById('detailsToggle').checked = true
+            }
+
+            if (localStorage.getItem('storage_usingDiscordState') == 'true') {
+                document.getElementById('stateToggle').checked = true
+            }
+
+            //find me
+
+            if (localStorage.getItem('storage_minimumPopupSize')) {
+                document.getElementById('popupMinSize').value = localStorage.getItem('storage_minimumPopupSize')
+            }
+
+            if (localStorage.getItem('storage_maximumPopupSize')) {
+                document.getElementById('popupMaxSize').value = localStorage.getItem('storage_maximumPopupSize')
+            }
+        }
+
+        // Loading sliders has its own function and cant be put in with load prefrences because it needs to be called more frequently 
+        function loadSliders() {
+            localStorage.setItem('storage_frequency', document.getElementById('frequency').value);
+            localStorage.setItem('storage_frequency02', document.getElementById('frequency02').value);
+            localStorage.setItem('storage_frequency03', document.getElementById('frequency03').value);
+            
+            if (document.getElementById('fadeTimeInput').value == '') {
+                localStorage.setItem('storage_fadetime', 60);
+            } else {
+                localStorage.setItem('storage_fadetime', document.getElementById('fadeTimeInput').value);
+            }
+
+            document.getElementById('fadeslider').value = localStorage.getItem('storage_fadetime');
+            document.getElementById('frequencyslider').value = localStorage.getItem('storage_frequency');
+            document.getElementById('frequencyslider02').value = localStorage.getItem('storage_frequency02');
+            document.getElementById('frequencyslider03').value = localStorage.getItem('storage_frequency03');
+        }
+
+        function changeFrequency() {
+            if (document.getElementById('frequencyToggle').checked) {
+                document.getElementById('frequencyOption02').style.display = 'block'
+                document.getElementById('frequencyOption01').style.display = 'none'
+            } else {
+            document.getElementById('frequencyOption01').style.display = 'block'
+            document.getElementById('frequencyOption02').style.display = 'none'
+            }
+        }
+
+
+
+
+
+        // Save and load resource paths using local storage
+        function saveResaurcePaths() {
+            console.log('Set file path is: ' + document.getElementById('imageFilePath').value)
+            localStorage.setItem('image_fp', document.getElementById('imageFilePath').value);
+            localStorage.setItem('video_fp', document.getElementById('videoFilePath').value);
+            localStorage.setItem('audio_fp', document.getElementById('audioFilePath').value);
+            home()
+        }
+        function loadResaurcePaths() {
+            document.getElementById('imageFilePath').value = localStorage.getItem('image_fp');
+            document.getElementById('videoFilePath').value = localStorage.getItem('video_fp');
+            document.getElementById('audioFilePath').value = localStorage.getItem('audio_fp');
+        }
+
+
+        //Test stuff in the splash screen with a key so I dont have to hook this up to a button
+        document.addEventListener("keydown", function(e) {
+            if (e.key == 'p' || e.key == 'P') {
+                console.log('Renderer element test: \n')
+            }
+        })
+
+
+        // Get rid of the spash screen once start is clicked
+        function destroy() {
+            window.close();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css" type="text/css">
+
+    <!--
+        Hello. This file is such a huge over complicated cluster fuck of code that even I dont really understand how it works.
+        If you plan to try and decode what the fuck is going on here good luck! I've labeled best I can for you but it will probably still be a nightmare.
+
+        When page is loaded the old saved array is kept but the visual representations do not get created nor work because of the array be populated with previus saves
+    -->
+
+    <style>
+        button {
+            cursor: pointer;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color: #cbcbcb;
+            border: 2px solid black;
+            width: 150px;
+            height: 50px;
+            font-size: 25px;
+            border-radius: 10px;
+        }
+
+        .item {
+            background-color: grey;
+            width: fit-content;
+            font-size: 30px;
+            display: inline-block;
+            height: fit-content;
+        }
+
+        .delete {
+            height: fit-content;
+            background-color: red;
+            width: fit-content;
+            font-size: 30px;
+            display: inline-block;
+            text-align: center;
+            cursor: pointer;
+            margin-left: 5px;
+            border-radius: 5%;
+        }
+    </style>
+</head>
+<body>
+    <h1 align="center">Caption editor</h1>
+
+    <div id="listContainer" align="left" style="margin-left: 25%;">
+    </div>
+
+    <br><br><br>
+
+    <center>
+    <input type="text" placeholder="Input caption here" id="captionToPush"> <br>
+    <button id="pushCaption" style="margin-top: 5px;">Submit</button>
+    <br><br>
+    <button id="saveCaptions">Save</button>
+    <button id="closeCaptions">Cancel</button>
+    <br>
+    <div hidden id="visualarray"></div>
+    </center>
+
+    <script>
+        captions = []
+        let numberOfItems = 0;
+
+        // Check for previus save and load it 
+        document.addEventListener("DOMContentLoaded", function() {
+            if (JSON.parse(localStorage.getItem('storage_captionList')) && JSON.parse(localStorage.getItem('storage_captionList')).length > 0) {
+                captions = JSON.parse(localStorage.getItem('storage_captionList'))
+                document.getElementById('visualarray').innerHTML = captions;
+
+                console.log(captions.length)
+                for (let i = 0; i < captions.length; i++) {
+                    numberOfItems = i
+                    const newCaption = captions[i];
+
+                    const captionDiv = document.createElement('div');
+                    captionDiv.className = 'item';
+                    captionDiv.textContent = newCaption;
+                    captionDiv.id = 'Caption_' + numberOfItems;
+
+                    const deleteButton = document.createElement('div');
+                    deleteButton.className = 'delete';
+                    deleteButton.textContent = 'X';
+                    deleteButton.id = 'Delete_' + numberOfItems;
+                    
+                    const lineBreak = document.createElement('br');
+                    lineBreak.id = 'LineBreak_' + numberOfItems;
+
+                    document.getElementById('listContainer').appendChild(captionDiv);
+                    document.getElementById('listContainer').appendChild(deleteButton);
+                    document.getElementById('listContainer').appendChild(lineBreak);
+
+                    document.getElementById('Delete_' + numberOfItems).style.width = `calc(${getComputedStyle(document.getElementById('Delete_' + numberOfItems)).width} + 10px)`;
+                    document.getElementById('Caption_' + numberOfItems).style.width = `calc(${getComputedStyle(document.getElementById('Caption_' + numberOfItems)).width} + 10px)`;
+
+                    document.getElementById('visualarray').innerHTML = captions;
+                    updateIDs();
+                }
+            } else {
+                document.getElementById('captionToPush').value = 'No captions'
+                document.getElementById('pushCaption').click();
+            }
+        });
+
+        document.getElementById('pushCaption').addEventListener('click', () => {
+            const newCaption = document.getElementById('captionToPush').value;
+            captions.push(newCaption);
+            numberOfItems++;
+
+            // Create a new div element for the caption
+            const captionDiv = document.createElement('div');
+            captionDiv.className = 'item';
+            captionDiv.textContent = newCaption;
+            captionDiv.id = 'Caption_' + numberOfItems;
+
+            // Create a new div element for the delete button
+            const deleteButton = document.createElement('div');
+            deleteButton.className = 'delete';
+            deleteButton.textContent = 'X';
+            deleteButton.id = 'Delete_' + numberOfItems;
+            
+            // Create a new line break element
+            const lineBreak = document.createElement('br');
+            lineBreak.id = 'LineBreak_' + numberOfItems;
+
+            // Append the new elements to the listContainer
+            document.getElementById('listContainer').appendChild(captionDiv);
+            document.getElementById('listContainer').appendChild(deleteButton);
+            document.getElementById('listContainer').appendChild(lineBreak);
+
+            // Give the delete button better dimensions
+            document.getElementById('Delete_' + numberOfItems).style.width = `calc(${getComputedStyle(document.getElementById('Delete_' + numberOfItems)).width} + 10px)`;
+            document.getElementById('Caption_' + numberOfItems).style.width = `calc(${getComputedStyle(document.getElementById('Caption_' + numberOfItems)).width} + 10px)`;
+
+            // Clear submission box
+            document.getElementById('captionToPush').value = '';
+            document.getElementById('visualarray').innerHTML = captions;
+        })
+
+        // Add event listener to the listContainer for all elements with the 'delete' class
+        document.getElementById('listContainer').addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete')) {
+                // Extract the numeric part from the ID using split
+                const numericPart = e.target.id.split('_')[1];
+
+                // Convert the numeric part to an integer
+                const numericValue = parseInt(numericPart);
+
+                // Remove the corresponding caption and line break
+                document.getElementById('Caption_' + numericPart).remove();
+                document.getElementById('Delete_' + numericPart).remove();
+                document.getElementById('LineBreak_' + numericPart).remove();
+
+                // Remove the item from the captions array using the index
+                captions.splice(numericValue - 1, 1);
+
+                if (captions.length == 0) {
+                    numberOfItems = 0
+                }
+
+                // Update the IDs and innerHTML after deletion
+                    updateIDs();
+            }
+        });
+
+        function updateIDs() {
+            const captionDivs = document.getElementsByClassName('item');
+            const deleteButtons = document.getElementsByClassName('delete');
+            const lineBreaks = document.querySelectorAll('br[id^="LineBreak_"]');
+
+            for (let i = 0; i < captionDivs.length; i++) {
+                captionDivs[i].id = 'Caption_' + (i + 1);
+                deleteButtons[i].id = 'Delete_' + (i + 1);
+                lineBreaks[i].id = 'LineBreak_' + (i + 1);
+            }
+
+            // Update visualarray div
+            document.getElementById('visualarray').innerHTML = captions;
+        }
+
+        // Save a copy of captions array in local storage
+        document.getElementById('saveCaptions').addEventListener('click', () => {
+            console.log(captions)
+            localStorage.setItem('storage_captionList', JSON.stringify(captions));
+            window.close();
+        })
+
+        document.getElementById('closeCaptions').addEventListener('click', () => {
+            window.close();
+        })
+
+        // Do the hover stuff
+        let btns = document.querySelectorAll('button');
+
+        for (i of btns) {
+        i.addEventListener('mouseover', function() {
+            this.classList.add("highlight")
+        });
+        i.addEventListener('mouseout', function() {
+            this.classList.remove("highlight")
+        });
+        }
+    </script>
+</body>
+</html>

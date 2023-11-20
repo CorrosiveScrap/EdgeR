@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio popup</title>
+    <link rel="stylesheet" href="main.css" type="text/css">
+    <style>
+        /* Reset default margin and padding */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        /* Center the image and make it cover the entire container */
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <p id="caption"></p>
+    <video id="background" src="" autoplay hidden></video>
+    <img src="img/audioFileMicrophone.png">
+    <button id="closeButton" onclick="closeWindow()" style="display: block;" class="">Close</button>
+
+    <script>
+        window.resizeTo(300, 300);
+
+        const audios = JSON.parse(localStorage.getItem('storage_audios'))
+
+        const folderPath = localStorage.getItem('storage_audios_path')
+
+        // Choose a random video from the video array
+        const rng = Math.floor(Math.random() * audios.length);
+        const audioUrl = `file://${folderPath}\\${audios[rng]}`;
+
+        // Set the source of the iframe to the selected video
+        const audioElement = document.getElementById('background');
+        audioElement.src = audioUrl;
+
+        // Set custom close text
+        document.getElementById('closeButton').innerText = localStorage.getItem('storage_closeText')
+
+        switch (localStorage.getItem('storage_closeLocation')) {
+            case "Bottom right": 
+            document.getElementById('closeButton').classList.add('closeButtonBR');
+            break;
+            case "Bottom left": 
+            document.getElementById('closeButton').classList.add('closeButtonBL');
+            break;
+            case "Top right": 
+            document.getElementById('closeButton').classList.add('closeButtonTR');
+            break;
+            case "Top left": 
+            document.getElementById('closeButton').classList.add('closeButtonTL');
+            break;
+        }
+
+        // Get captions
+        ar = JSON.parse(localStorage.getItem('storage_captionList'))
+
+        // Check if captions need to be displayed and style them
+        if (localStorage.getItem('storage_displayCaptions') == 'true') {
+            x = Math.floor(Math.random() * ar.length)
+
+            document.getElementById('caption').innerHTML = ar[x]
+
+            document.getElementById('caption').style.color = localStorage.getItem('storage_captionColor')
+            document.getElementById('caption').style.fontSize = localStorage.getItem('storage_captionSize')
+            document.getElementById('caption').style.fontFamily = localStorage.getItem('storage_captionFont')
+            document.getElementById('caption').style.textShadow = localStorage.getItem('storage_captionShadow')
+            document.getElementById('caption').style.textAlign = localStorage.getItem('storage_captionAlign')
+
+            if (localStorage.getItem('storage_boldcaps') == 'true') {
+                document.getElementById('caption').style.fontWeight = 'bold'
+            }
+
+            if (localStorage.getItem('storage_italcaps') == 'true') {
+                document.getElementById('caption').style.fontStyle = 'italic'
+            }
+
+            if (localStorage.getItem('storage_captionPlacement') == 'Top') {
+                document.getElementById('caption').classList.add('top')
+            } else {
+                document.getElementById('caption').classList.add('bottom')
+            }
+        }
+
+        if (localStorage.getItem('storage_closeAbilitie') == 'true') {
+            document.getElementById('closeButton').style.display = 'none'
+        }
+
+        if (localStorage.getItem('storage_isAudioLooped') == 'true') {
+            audioElement.loop = true
+        }
+
+        audioElement.addEventListener('ended', videoEnded);
+
+        function videoEnded() {
+            window.close();
+        }
+
+        // This closes the window once the button is clicked
+        function closeWindow() {
+            window.close();
+        }
+    </script>
+</body>
+</html>
