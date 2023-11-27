@@ -13,17 +13,45 @@
             overflow-x: hidden;
             overflow-y: scroll;
             cursor: default;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            user-select: none;
+        }
+
+        body.loaded {
+            opacity: 1;
         }
 
         button {
             cursor: pointer;
             font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            background-color: #cbcbcb;
-            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
             width: 200px;
             height: 75px;
             font-size: 25px;
+            border: none;
             border-radius: 10px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+
+            transition: width 0.2s ease-in-out, height 0.2s ease-in-out, border 0.2s ease-in-out;
+        }
+
+        button:hover {
+            width: 240px;
+            height: 95px;
+            border: 2px solid white
+        }
+
+        .menus {
+            color: white;
+        }
+
+        .menuPages {
+            color: white;
+            font-size: 25px;
         }
 
         .slider {
@@ -32,6 +60,47 @@
             border-radius: 50%;
         }
     </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            document.body.classList.add('loaded');
+            startGradientEffect();
+        });
+
+        let colorHue = 220;
+        let gradientPos = 0
+        let smooth = true
+
+        function changeHue() {
+            gradientPos++
+
+            if (gradientPos >= 360) {
+                gradientPos = 0
+            }
+
+            if (smooth == true) {
+                colorHue++
+            } else if (smooth == false) {
+                colorHue--
+            }
+
+            if (colorHue >= 250) {
+                smooth = false
+            } else if (colorHue <= 190) {
+                smooth = true
+            }
+            
+            const gradientColor = `linear-gradient(${gradientPos}deg, hsl(${colorHue}, 100%, 50%), hsl(${colorHue + 60}, 100%, 50%))`;
+
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.style.background = gradientColor;
+            });
+        }
+
+        function startGradientEffect() {
+            setInterval(changeHue, 100);
+        }
+    </script>
 </head>
 <body onload="loadPrefrences()">
     <center>
@@ -41,7 +110,7 @@
         <center>
             <div style="font-size: 73px; text-shadow: 2px 2px 10px #000000;" id="inhome">EdgeR</div> <br><br>
             <button onclick="destroy()" id="start">Start</button> <br><br>
-            <button onclick="swapPage(this), loadSliders()">Preferences</button> <br><br>
+            <button onclick="swapPage(this), loadSliders()" id="myButton">Preferences</button> <br><br>
             <button id="swapbutton" onclick="swapPage(this), loadResaurcePaths()">Swap material</button> <br><br>
             <button onclick="swapPage(this)">Extra</button> <br><br>
             <button id="closeApp">Quit</button>
@@ -56,147 +125,264 @@
     </div>
 
     <div id="Preferences" style="text-shadow: 2px 2px 10px black;" class="hidden">
+        <div style="background-color: rgba(0, 0, 0, 0.571); position: fixed; top: 0; left: 0; height: 100%; width: 100%; z-index: -5;"></div>
+
+        <div style="display: flex;">
+            <div>
+                <button class="menus" value="prefrencesGeneral">General</button> <br><br>
+                <button class="menus" value="prefrencesCreation">Window creation</button> <br><br>
+                <button class="menus" value="prefrencesEditMedia">Edit media</button> <br><br>
+                <button class="menus" value="prefrencesMoreControl">More control</button> <br><br>
+                <button class="menus" value="prefrencesDangerZone">Danger zone</button> <br><br>
+                <button class="menus" value="prefrencesDiscordRichPresence">Discord rich presence</button> <br><br>
+                <button class="menus" value="prefrencesSettings">Prefrence settings</button> <br>
+            </div>
+
+            <div style="margin-left: 20px; width: 100%;">
+
+                <div id="prefrencesGeneral" class="menuPages">
+                    <center>
+                        <h1>General</h1>
+                    </center>
+
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                                <u>Type of media created</u> <br>
+                                Create images <input type="checkbox" id="willCreateImages" checked> <br>
+                                Create videos <input type="checkbox" id="willCreateVideos"> <br>
+                                Create audio <input type="checkbox" id="willCreateAudio"> <br>
+                        </div>
+
+                        <div style="flex-basis: 33%;">
+                            <u>Creation rate</u> <br>
+                            Create all <input type="radio" name="createAmountOfMedia" id="createAll" value="" checked> <br>
+                            Create one <input type="radio" name="createAmountOfMedia" id="createOne" value=""> <br>
+                            Create amount <input type="radio" name="createAmountOfMedia" id="createAmount" value=""> <br>
+                            Amount created <input type="number" id="creationAmount" style="width: 35px;" placeholder="5">
+                        </div>
+                        <div style="flex-basis: 33%;">
+                            <u>Window fading</u> <br>
+                            Enable fading <input id="doesWindowFade" type="checkbox"> <br>
+                            Fade out after <input type="number" id="fadeTimeInput" placeholder="60" style="width: 50px;" onblur="loadSliders()"> seconds<br>
+                            <input class="slider" style="width: 100%;" id="fadeslider" type="range" min="1" max="120" value="60" oninput="document.getElementById('fadeTimeInput').value = this.value">
+                        </div>
+                </div>
+                <hr>
+                <div style="display: flex;">
+                    <div style="flex-basis: 50%;">
+                        <u>Pop up clock</u><br>
+                        Random pop up time <input id="frequencyToggle" type="checkbox" onclick="changeFrequency()"><br>
+
+                        <div id="frequencyOption01" style="display: none;">
+                        Pop ups apear every <input type="number" id="frequency" placeholder="5" style="width: 50px;" onblur="loadSliders()"> seconds<br>
+                        <input class="slider" id="frequencyslider" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency').value = this.value">
+                        </div>
+
+                        <div id="frequencyOption02" style="display: none;">
+                        Pop ups apear every <input type="number" id="frequency02" placeholder="5" style="width: 50px;" onblur="loadSliders()"> to 
+                        <input type="number" id="frequency03" placeholder="5" style="width: 50px;" onblur="loadSliders()"> seconds<br>
+                        <input class="slider" id="frequencyslider02" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency02').value = this.value">
+                        <input class="slider" id="frequencyslider03" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency03').value = this.value">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <div id="prefrencesCreation" class="menuPages">
+                    <center><h1>Window creation</h1></center>
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            <u>Posible window size</u><br>
+                            Minimum size <input type="number" id="popupMinSize" style="width: 50px;" placeholder="300"> <br>
+                            Maximum size <input type="number" id="popupMaxSize" style="width: 50px;" placeholder="700">
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div id="prefrencesEditMedia" class="menuPages">
+                    <center><h1>Edit media</h1></center>
+
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            <u>Configure audio pop up</u><br>
+                            Loop audio <input type="checkbox" id="audioLoop"> <br>
+                            Hide windows <input type="checkbox" id="audioHide"> <br>
+                            <!--
+                            Show default image on audio windows <input type="radio" name="audioWindowContent" checked> <br>
+                            Show images on audio windows <input type="radio" name="audioWindowContent"> <br>
+                            Show videos on audio windows <input type="radio" name="audioWindowContent"> <br>
+                            -->
+                        </div>
+
+                        <div style="flex-basis: 33%;">
+                            <u>Configure video pop up</u><br>
+                            Mute videos <input type="checkbox" id="videosMuted" checked> <br>
+                            Loop videos <input name="handleVideoEnd" id="videoLoop" type="radio" checked> <br>
+                            Change video <input name="handleVideoEnd" id="videoChange" type="radio"> <br>
+                            Close video <input name="handleVideoEnd" id="videoClose" type="radio"> <br>
+                        </div>
+
+                        <div style="flex-basis: 33%;">
+                            <u>Close button</u><br>
+                            Disable<input id="closeToggle" type="checkbox"><br>
+                            Button text <input type="text" id="closeButtonTextInput" style="width: 100px;" placeholder="I submit <3"> <br>
+                            Location
+                            <select id="closeButtonLocation">
+                                <option>Bottom right</option>
+                                <option>Bottom left</option>
+                                <option>Top right</option>
+                                <option>Top left</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            <u>Captions</u> <br>
+                            Display captions <input type="checkbox" id="willCreateCaptions"><br><br>
+                            <button type="button" id="opencaptioneditor" style="width: 180px; height: 50px; font-size: 15px;">Open caption editor</button> 
+                        </div>
+                        <div style="flex-basis: 33%;">
+                            <u>Style captions</u> <br>
+                            Text color <input type="text" id="cap_textcolor" style="width: 100px;" placeholder="white"> <br>
+                            Text size <input type="text" id="cap_textsize" style="width: 100px;" placeholder="22px"> <br>
+                            Font family <input type="text" id="cap_font" style="width:fit-content;" placeholder="'Courier New', Courier, monospace"> <br>
+                            Text shadow <input type="text" id="cap_textshadow" style="width: 150px;" placeholder="black 2px 2px"> <br>
+                            Text align <input type="text" id="cap_align" style="width: 100px;" placeholder="center"> <br>
+                            Text placement 
+                            <select id="cap_placement">
+                                <option>Top</option>
+                                <option>Bottom</option>
+                            </select><br>
+                            Bold <input type="checkbox" id="cap_bold"><br>
+                            Italic <input type="checkbox" id="cap_italic">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="prefrencesMoreControl" class="menuPages">
+                    <center><h1>More control</h1></center>
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            <p>No current content stay tuned for more updates</p>
+                        </div>
+                    </div>
+                </div>
+                    <!--
+                    <div style="display: flex;">
+                        <div style="flex-basis: 60%;">
+                            <u>Connect to EdgeR controler</u> <br>
+                            Controler password <input type="password">
+                        </div>
+                        <div style="flex-basis: 40%;">
+                            <u>Control settings</u> <br>
+                            Minimal EdgeR access<input type="radio" checked><br>
+                            Full RdgeR access<input type="radio"><br>
+                            Access to pc<input type="radio"><br>
+                            Full pc control<input type="radio">
+                        </div>
+                    </div>
+                </div>
+                -->
+
+                <div id="prefrencesDangerZone" class="menuPages">
+                    <center><h1>Danger Zone</h1></center>
+
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            <p>No current content stay tuned for more updates</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="prefrencesDiscordRichPresence" class="menuPages">
+                    <center><h1>Rich presence</h1></center> 
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            <u>Enable</u> <br>
+                            Show on discord <input type="checkbox" id="showOnDiscord"> <br>
+                        </div>
+                        <div style="flex-basis: 33%;">
+                            <u>Change extra info</u> <br>
+                            Details: <input type="text" placeholder="Default details" id="detailsText"> <input type="checkbox" id="detailsToggle"> <br>
+                            State: <input type="text" placeholder="Default state" id="stateText"> <input type="checkbox" id="stateToggle"></div>           
+                    </div>
+                    <br><br>
+                    <p>*Discord settings are still buggy <br> &nbsp; Its very unlikely they will work 100% of the time</p>
+                </div>
+
+                <div id="prefrencesSettings" class="menuPages">
+                    <center><h1>Settings</h1></center>
+
+                    <div style="display: flex;">
+                        <div style="flex-basis: 33%;">
+                            Use miliseconds <input type="checkbox" id="countInMs"> <br>
+                            (This does not apply to fade time)
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <br>
         <center>
-            <div style="font-size: 63px;"><b>Preferences</b></div><br>
-            <form align="left" style="margin-left: 35%;">
-                <details>
-                    <summary style="font-size: 22px; cursor: pointer;" title="Edit the amount and frequency of popups">Popup creation</summary>
-                    <br>
-                    Create images <input type="checkbox" id="willCreateImages" checked> <br>
-                    Create videos <input type="checkbox" id="willCreateVideos"> <br>
-                    Create audio <input type="checkbox" id="willCreateAudio"> <br>
-                    <br>
+        <button id="sendSettings" onclick="home(), savePrefrences()">Save</button>
+        <button onclick="home(), loadPrefrences()">cancel</button>
+        </center>
+
+        <script>
+            document.querySelectorAll('.menuPages').forEach(div => {
+                div.classList.add('hidden')
+            });
+            document.getElementById('prefrencesGeneral').classList.remove('hidden')
 
 
-                    Create all <input type="radio" name="createAmountOfMedia" id="createAll" value="" checked> <br>
-                    Create one <input type="radio" name="createAmountOfMedia" id="createOne" value=""> <br>
-                    Create amount <input type="radio" name="createAmountOfMedia" id="createAmount" value=""> <br>
-                    <br>
-                    Amount created <input type="number" id="creationAmount" style="width: 35px;" placeholder="5">
-                    <br><br>
+            document.querySelectorAll('.menus').forEach(button => {
+                button.addEventListener('click', (event) => {
 
-                    <!--Find me-->
-                    Minimum size <input type="number" id="popupMinSize" style="width: 50px;" placeholder="300"> <br>
-                    Maximum size <input type="number" id="popupMaxSize" style="width: 50px;" placeholder="700">
-                    <br><br>
+                    document.querySelectorAll('.menuPages').forEach(div => {
+                        div.classList.add('hidden')
+                    });
 
-                    Windows fade <input id="doesWindowFade" type="checkbox"> <br>
-                    <br>
-                    Windows fade after <input type="number" id="fadeTimeInput" placeholder="60" style="width: 50px;" onblur="loadSliders()"> seconds<br>
-                    <input class="slider" id="fadeslider" type="range" min="1" max="120" value="60" class="slider" oninput="document.getElementById('fadeTimeInput').value = this.value">
-                    <br><br><br>
+                    document.getElementById(event.target.value).classList.remove('hidden')
+                });
+            });
+        </script>
 
-                    Random popup time <input id="frequencyToggle" type="checkbox" onclick="changeFrequency()"><br><br>
+            <center>
+            <!--
 
-                    <div id="frequencyOption01" style="display: none;">
-                    Popups apear every <input type="number" id="frequency" placeholder="5" style="width: 50px;" onblur="loadSliders()"> seconds<br>
-                    <input class="slider" id="frequencyslider" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency').value = this.value">
-                    </div>
-
-                    <div id="frequencyOption02" style="display: none;">
-                    Popups apear every <input type="number" id="frequency02" placeholder="5" style="width: 50px;" onblur="loadSliders()"> to 
-                    <input type="number" id="frequency03" placeholder="5" style="width: 50px;" onblur="loadSliders()"> seconds<br>
-                    <input class="slider" id="frequencyslider02" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency02').value = this.value">
-                    <input class="slider" id="frequencyslider03" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency03').value = this.value">
-                    </div>
+                    
 
                 </details>
                 <br>
                 <details>
                     <summary style="font-size: 22px;" title="Enable and edit things that are overlayed on popups">Edit media</summary>
                     <br>
-                    Disable close button <input id="closeToggle" type="checkbox"><br><br>
-                    Close button text <input type="text" id="closeButtonTextInput" style="width: 100px;" placeholder="I submit <3"> <br>
-                    Close button location 
-                    <select id="closeButtonLocation">
-                        <option>Bottom right</option>
-                        <option>Bottom left</option>
-                        <option>Top right</option>
-                        <option>Top left</option>
-                    </select>
-                    <br><br>
-                    Display captions <input type="checkbox" id="willCreateCaptions"><br><br>
-                    <button type="button" id="opencaptioneditor" style="width: 150px; height: 30px; font-size: 15px;">Open caption editor</button> 
-                    <br><br>
-                    Style captions: <br>
-                    Text color <input type="text" id="cap_textcolor" style="width: 100px;" placeholder="white"> <br>
-                    Text size <input type="text" id="cap_textsize" style="width: 100px;" placeholder="22px"> <br>
-                    Font family <input type="text" id="cap_font" style="width:fit-content;" placeholder="'Courier New', Courier, monospace"> <br>
-                    Text shadow <input type="text" id="cap_textshadow" style="width: 150px;" placeholder="black 2px 2px"> <br>
-                    Text align <input type="text" id="cap_align" style="width: 100px;" placeholder="center"> <br>
-                    Text placement 
-                    <select id="cap_placement">
-                        <option>Top</option>
-                        <option>Bottom</option>
-                    </select><br>
-                    Bold <input type="checkbox" id="cap_bold"><br>
-                    Italic <input type="checkbox" id="cap_italic">
-                    <br>
-                    <br>
-                    <br>
-                        Loop audio <input type="checkbox" id="audioLoop"> <br>
-                        Hide audio windows <input type="checkbox" id="audioHide"> <br>
-                        Show default image on audio windows <input type="radio" name="audioWindowContent" checked> <br>
-                        Show images on audio windows <input type="radio" name="audioWindowContent"> <br>
-                        Show videos on audio windows <input type="radio" name="audioWindowContent"> <br>
-                        <br>
-                        Mute videos <input type="checkbox" id="videosMuted" checked> <br>
-                        Videos loop <input name="handleVideoEnd" id="videoLoop" type="radio" checked> <br>
-                        Videos change after play <input name="handleVideoEnd" id="videoChange" type="radio"> <br>
-                        Videos close after play <input name="handleVideoEnd" id="videoClose" type="radio"> <br>
-                        <br>
-                </details>
-                <!--
-                <br>
-                <details>
-                    <summary style="font-size: 22px;">Lock options</summary>
-
-                    <br>
-                    Disable close button <input type="checkbox"> <br>
-                    Disable freezing <input type="checkbox"> <br>
-                    <br>
-                    Require password to reopen preferences <input type="checkbox"> <br>
-                    Require password to quit app <input type="checkbox"> <br>
-                    <br>
-                    Show password <input type="checkbox"> <br>
-                    Set password <input style="width: 100px;" type="password" placeholder="password">
                     
                 </details>
                 <br>
                 <details>
-                    <summary style="font-size: 22px; cursor: pointer;" title="Much more control over how you lose control">More control</summary>
-                    <br>
-                    Lock PC based on time<input type="checkbox"> <br>
-                    Lock out time <input type="text" placeholder="20:00" style="width: 40px;"> to <input type="text" placeholder="7:00" style="width: 40px;"><br>
-                    <br>
-                    Lock PC after amount of time pased<input type="checkbox"> <br>
-                    Time before lock out <input type="text" placeholder="4" style="width: 30px;"> hours <br>
-                    Reset at <input type="text" placeholder="7:00" style="width: 40px;"><br>
-                </details>
-                -->
-                <br>
-                <details>
                     <summary style="font-size: 22px; cursor: pointer;" title="General quality of life">Prefrence settings</summary>
                     <br>
-                    Time is counted in miliseconds <input type="checkbox" id="countInMs"> <br>
-                    (This does not apply to fade time)
+                    
                 </details>
                 <br>
                 <details>
                     <summary style="font-size: 22px; cursor: pointer;" title="Customize the was edger looks on discord">Discord rich presence</summary>
                     <br>
-                    Show on discord <input type="checkbox" id="showOnDiscord"> <br>
-                    Details: <input type="text" placeholder="Default details" id="detailsText"> <input type="checkbox" id="detailsToggle"> <br>
-                    State: <input type="text" placeholder="Default state" id="stateText"> <input type="checkbox" id="stateToggle">
-
-                    <p>*Discord settings are still buggy <br> Its very unlikely they will work 100% of the time</p>
+                    
                 </details>
 
             </form>
-
+        -->
             <br><br>
-            <button id="sendSettings" style="width: 150px; height: 50px;" onclick="home(), savePrefrences()">Save</button> <br><br>
-            <button style="width: 150px; height: 50px;" onclick="home(), loadPrefrences()">cancel</button>
+            
         </center>
     </div>
 
@@ -217,7 +403,7 @@
             <br><br>
             <details>
                 <Summary>How to use</Summary>
-                <p>
+                <p style="text-align: left; margin-left: 15%; text-shadow: black 2px 2px;">
                     1: Click on the <b>choose folder</b> button to bring up the file explorer <br>
                     2: Click on the folder that contains whatever you want displayed on the popups<br>
                     3: Click select folder in the bottom right <br><br>
@@ -231,7 +417,7 @@
         <center>
             <h1 style="font-size: 63px;">Extra</h1>
             <a href="https://github.com/700Maps/EdgeR" target="_blank">EdgeR Github</a> <br><br>
-            <a href="versions.html" target="_blank">Version hystory</a> <br><br>
+            <a href="versions.html" target="_blank">Version history</a> <br><br>
             <a href="https://twitter.com/700mps" target="_blank" title="I fucking hate that I have to refer to this website as X">My twitter / X</a> <br><br>
             <br>
             <button onclick="home()">Back</button>
@@ -240,6 +426,8 @@
 
     <script>
         //Change between sections in the splash screen
+        let clock
+        let windowX = 700
         function swapPage(obj) {
             document.getElementById('Home').classList.add("hidden");
             document.getElementById('Preferences').classList.add("hidden");
@@ -247,27 +435,37 @@
             document.getElementById('Extra').classList.add("hidden");
 
             document.getElementById(obj.innerHTML).classList.remove("hidden");
+
+            if (obj.innerHTML == 'Preferences') {
+                windowX = 700
+                clock = setInterval( function() {
+                    windowX += 25
+                    window.resizeTo(windowX,820);
+
+                    if (windowX >= 1200) {
+                        clearInterval(clock)
+                    }
+                }, 1)
+            }
         }
         function home() {
             document.getElementById('Home').classList.remove("hidden");
             document.getElementById('Preferences').classList.add("hidden");
             document.getElementById('Swap material').classList.add("hidden");
             document.getElementById('Extra').classList.add("hidden");
+
+            clearInterval(clock)
+            if (windowX != 700) {
+                clock = setInterval( function() {
+                    windowX -= 25
+                    window.resizeTo(windowX,820);
+
+                    if (windowX <= 700) {
+                        clearInterval(clock)
+                    }
+                }, 1)
+            }
         }
-
-
-        // Change the background color of buttons then you hover over them by adding and removing a class
-        let btns = document.querySelectorAll('button');
-
-        for (i of btns) {
-        i.addEventListener('mouseover', function() {
-            this.classList.add("highlight")
-        });
-        i.addEventListener('mouseout', function() {
-            this.classList.remove("highlight")
-        });
-        }
-
 
         // Stop negative numbers and numbers that are larger than 99 from being used
         document.getElementById('creationAmount').addEventListener('input', function(event) {
@@ -280,75 +478,56 @@
         });
 
 
-
-
-
-        // Save and load prefrences with local storage
         function savePrefrences() {
 
-            //Popup creation
-            localStorage.setItem('storage_frequency', document.getElementById('frequency').value);
+            //Helper functions
+            const getElementValue = (elementId) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    return element.value || element.placeholder || null;
+                }
+                return null;
+            };
 
-            if (document.getElementById('fadeTimeInput').value == '') {
-                localStorage.setItem('storage_fadetime', 60);
-            } else {
-                localStorage.setItem('storage_fadetime', document.getElementById('fadeTimeInput').value);
-            }
+            const setLocalStorageItem = (key, value) => {
+            localStorage.setItem(key, value);
+            };
 
-            if (document.getElementById('createAll').checked == true) {
-                localStorage.setItem('storage_creationType', JSON.stringify(3))
-            } else if (document.getElementById('createOne').checked == true) {
-                localStorage.setItem('storage_creationType', JSON.stringify(1));
-            } else if (document.getElementById('createAmount').checked == true && document.getElementById('creationAmount').value) {
-                localStorage.setItem('storage_creationType', JSON.stringify(document.getElementById('creationAmount').value));
-            } else {
-                localStorage.setItem('storage_creationType', JSON.stringify(5));
-            }
+            //General
+            setLocalStorageItem('storage_frequency', getElementValue('frequency'));
+            setLocalStorageItem('storage_frequency02', getElementValue('frequency02'));
+            setLocalStorageItem('storage_frequency03', getElementValue('frequency03'));
 
-            if (document.getElementById('creationAmount').value) {
-                localStorage.setItem('storage_amountOfPopupsDisplay', document.getElementById('creationAmount').value)
-            }
+            const doesfade = document.getElementById('doesWindowFade').checked;
+            setLocalStorageItem('storage_ifFade', doesfade)
 
+            const imgs = document.getElementById('willCreateImages').checked
+            setLocalStorageItem('storage_typeOfMedia0', imgs)
 
-            if (document.getElementById('doesWindowFade').checked) {
-                doesfade = true
-            } else {
-                doesfade = false
-            }
-            localStorage.setItem('storage_ifFade', doesfade);
+            const vids = document.getElementById('willCreateVideos').checked
+            setLocalStorageItem('storage_typeOfMedia1', vids)
 
-            if (document.getElementById('willCreateImages').checked) {
-                imgs = true
-            } else {
-                imgs = false
-            }
-            localStorage.setItem('storage_typeOfMedia0', imgs);
+            const audis = document.getElementById('willCreateAudio').checked
+            setLocalStorageItem('storage_typeOfMedia2', audis)
 
-            if (document.getElementById('willCreateVideos').checked) {
-                vids = true
-            } else {
-                vids = false
-            }
-            localStorage.setItem('storage_typeOfMedia1', vids);
+            const ftog = document.getElementById('frequencyToggle').checked
+            setLocalStorageItem('storage_typeOfFrequency', ftog)
 
-            if (document.getElementById('willCreateAudio').checked) {
-                audis = true
-            } else {
-                audis = false
-            }
-            localStorage.setItem('storage_typeOfMedia2', audis);
+            const creationType = (() => {
+                if (document.getElementById('createAll').checked) return JSON.stringify(3);
+                if (document.getElementById('createOne').checked) return JSON.stringify(1);
+                const creationAmount = getElementValue('creationAmount');
+                return creationAmount ? JSON.stringify(creationAmount) : JSON.stringify(5);
+            })();
+            setLocalStorageItem('storage_creationType', creationType);
+
+            const fadeTimeInput = getElementValue('fadeTimeInput', 60);
+            setLocalStorageItem('storage_fadetime', fadeTimeInput);
+
+            setLocalStorageItem('storage_amountOfPopupsDisplay', getElementValue('creationAmount'))
 
 
-            if (document.getElementById('frequencyToggle').checked) {
-                ftog = true
-            } else {
-                ftog = false
-            }
-            localStorage.setItem('storage_typeOfFrequency', ftog);
-
-
-            //find me
-
+            //Window creation
             if (document.getElementById('popupMinSize').value) {
                 JSON.stringify(localStorage.setItem('storage_minimumPopupSize', document.getElementById('popupMinSize').value))
             } else {
@@ -362,130 +541,106 @@
             }
 
 
-
             //Edit media
-            if (document.getElementById('closeButtonTextInput').value == '') {
-                localStorage.setItem('storage_closeText', "I submit <3")
-            } else {
-                localStorage.setItem('storage_closeText', document.getElementById('closeButtonTextInput').value)
-            }
+            const cls = document.getElementById('closeToggle').checked
+            setLocalStorageItem('storage_closeAbilitie', cls)
 
-            if (document.getElementById('closeToggle').checked) {
-                cls = true
-            } else {
-                cls = false
-            }
-            localStorage.setItem('storage_closeAbilitie', cls);
+            const caps = document.getElementById('willCreateCaptions').checked
+            setLocalStorageItem('storage_displayCaptions', caps)
 
-            localStorage.setItem('storage_closeLocation', document.getElementById('closeButtonLocation').value)
+            const boldcap = document.getElementById('cap_bold').checked
+            setLocalStorageItem('storage_boldcaps', boldcap)
 
-            if (document.getElementById('willCreateCaptions').checked) {
-                caps = true
-            } else {
-                caps = false
-            }
-            localStorage.setItem('storage_displayCaptions', caps);
+            const italcap = document.getElementById('cap_italic').checked
+            setLocalStorageItem('storage_italcaps', italcap)
 
-            localStorage.setItem('storage_captionColor', document.getElementById('cap_textcolor').value);
-            localStorage.setItem('storage_captionSize', document.getElementById('cap_textsize').value);
-            localStorage.setItem('storage_captionFont', document.getElementById('cap_font').value);
-            localStorage.setItem('storage_captionShadow', document.getElementById('cap_textshadow').value);
-            localStorage.setItem('storage_captionAlign', document.getElementById('cap_align').value);
-            localStorage.setItem('storage_captionPlacement', document.getElementById('cap_placement').value);
+            const mutevid = document.getElementById('videosMuted').checked
+            setLocalStorageItem('storage_isVideoMuted', mutevid)
 
-            if (document.getElementById('cap_bold').checked) {
-                boldcap = true
-            } else {
-                boldcap = false
-            }
-            localStorage.setItem('storage_boldcaps', boldcap);
+            setLocalStorageItem('storage_closeLocation', getElementValue('closeButtonLocation'))
 
-            if (document.getElementById('cap_italic').checked) {
-                italcap = true
-            } else {
-                italcap = false
-            }
-            localStorage.setItem('storage_italcaps', italcap);
+            setLocalStorageItem('storage_captionColor', getElementValue('cap_textcolor'))
+            setLocalStorageItem('storage_captionSize', getElementValue('cap_textsize'))
+            setLocalStorageItem('storage_captionFont', getElementValue('cap_font'))
+            setLocalStorageItem('storage_captionShadow', getElementValue('cap_textshadow'))
+            setLocalStorageItem('storage_captionAlign', getElementValue('cap_align'))
+            setLocalStorageItem('storage_captionPlacement', getElementValue('cap_placement'))
 
-            if (document.getElementById('videoLoop').checked == true) {
-                vidEndOpt = 'loop'
-            } else if (document.getElementById('videoChange').checked == true) {
-                vidEndOpt = 'change'
-            } else if (document.getElementById('videoClose').checked == true) {
-                vidEndOpt = 'close'
-            }
-            localStorage.setItem('storage_videoEndOption', vidEndOpt);
+            const loopaudi = document.getElementById('audioLoop').checked
+            setLocalStorageItem('storage_isAudioLooped', loopaudi)
 
+            const hideaudi = document.getElementById('audioHide').checked
+            setLocalStorageItem('storage_isAudioHidden', hideaudi)
 
-            if (document.getElementById('videosMuted').checked == true) {
-                mutevid = true
-            } else {
-                mutevid = false
-            }
-            localStorage.setItem('storage_isVideoMuted', mutevid);
+            const closeText = getElementValue('closeButtonTextInput') === '' ? "I submit <3" : getElementValue('closeButtonTextInput');
+            setLocalStorageItem('storage_closeText', closeText);
 
-            if (document.getElementById('audioLoop').checked == true) {
-                loopaudi = true
-            } else {
-                loopaudi = false
-            }
-            localStorage.setItem('storage_isAudioLooped', loopaudi);
+            console.log(getElementValue('closeButtonTextInput'))
+            console.log(localStorage.getItem('storage_closeText'))
+            
+            const vidEndType = (()=> {
+                if (document.getElementById('videoLoop').checked) return 'loop'
+                if (document.getElementById('videoChange').checked) return 'change'
+                if (document.getElementById('videoClose').checked) return 'close'
+            })();
+            setLocalStorageItem('storage_videoEndOption', vidEndType)
 
+            //More control
 
-            if (document.getElementById('audioHide').checked == true) {
-                hideaudi = true
-            } else {
-                hideaudi = false
-            }
-            localStorage.setItem('storage_isAudioHidden', hideaudi);
+            //Danger zone
 
+            //Discord rich presence
+            const showOndis = document.getElementById('showOnDiscord').checked
+            setLocalStorageItem('storage_ifdiscord', showOndis)
 
-            //QOL
-            if (document.getElementById('countInMs').checked) {
-                usems = true
-            } else {
-                usems = false
-            }
-            localStorage.setItem('storage_countType', usems);
+            const detaislOn = document.getElementById('detailsToggle').checked
+            setLocalStorageItem('storage_usingDiscordDetails', detaislOn)
 
+            const stateOn = document.getElementById('stateToggle').checked
+            setLocalStorageItem('storage_usingDiscordState', stateOn)
 
+            setLocalStorageItem('storage_detailsText', getElementValue('detailsText'))
+            setLocalStorageItem('storage_stateText', getElementValue('stateText'))
 
-            //Rich presence
-            if (document.getElementById('showOnDiscord').checked) {
-                showOndis = true
-            } else {
-                showOndis = false
-            }
-            localStorage.setItem('storage_ifdiscord', showOndis);
-
-            if (document.getElementById('detailsToggle').checked) {
-                detaislOn = true
-            } else {
-                detaislOn = false
-            }
-            localStorage.setItem('storage_usingDiscordDetails', detaislOn);
-
-            if (document.getElementById('stateToggle').checked) {
-                stateOn = true
-            } else {
-                stateOn = false
-            }
-            localStorage.setItem('storage_usingDiscordState', stateOn);
-
-            localStorage.setItem('storage_detailsText', document.getElementById('detailsText').value)
-            localStorage.setItem('storage_stateText', document.getElementById('stateText').value)
-
-            console.log('Prefrences saved')
+            //Prefrence settings
+            const usems = document.getElementById('countInMs').checked
+            setLocalStorageItem('storage_countType', usems)
         }
+
+        function loadPrefrencesNew() {
+            function setValueFromLocalStorage(elementId, storageKey) {
+                const element = document.getElementById(elementId);
+                const storedValue = localStorage.getItem(storageKey);
+
+                if (element && storedValue !== null) {
+                    if (element.type === 'checkbox') {
+                        element.checked = storedValue === 'true';
+                    } else {
+                        element.value = storedValue;
+                    }
+                }
+            }
+
+            setValueFromLocalStorage('frequency', 'storage_frequency');
+            setValueFromLocalStorage('frequency02', 'storage_frequency02');
+            setValueFromLocalStorage('frequency03', 'storage_frequency03');
+            setValueFromLocalStorage('fadeTimeInput', 'storage_fadetime');
+            setValueFromLocalStorage('closeButtonTextInput', 'storage_closeText');
+        }
+
+
         function loadPrefrences() {
-            document.getElementById('frequency').value = localStorage.getItem('storage_frequency');
-            document.getElementById('frequency02').value = localStorage.getItem('storage_frequency02');
-            document.getElementById('frequency03').value = localStorage.getItem('storage_frequency03');
-            document.getElementById('fadeTimeInput').value = localStorage.getItem('storage_fadetime');
-            document.getElementById('closeButtonTextInput').value = localStorage.getItem('storage_closeText')
+            loadPrefrencesNew()
 
             if (localStorage.getItem('storage_ifFade') == 'true') {
                 document.getElementById('doesWindowFade').checked = true;
+            }
+
+            if (localStorage.getItem('storage_typeOfFrequency') == 'true') {
+                document.getElementById('frequencyToggle').checked = true;
+                document.getElementById('frequencyOption02').style.display = 'block'
+            } else {
+                document.getElementById('frequencyOption01').style.display = 'block'
             }
 
             if (localStorage.getItem('storage_ifdiscord') == 'true') {
@@ -514,40 +669,32 @@
                 document.getElementById('closeToggle').checked = true;
             }
 
-            if (localStorage.getItem('storage_typeOfFrequency') == 'true') {
-                document.getElementById('frequencyToggle').checked = true;
-                document.getElementById('frequencyOption02').style.display = 'block'
-            } else {
-                document.getElementById('frequencyOption01').style.display = 'block'
-            }
-
-
             if (localStorage.getItem('storage_closeLocation')) {
                 document.getElementById('closeButtonLocation').value = localStorage.getItem('storage_closeLocation')
             }
 
-            if (localStorage.getItem('storage_displayCaptions')) {
+            if (localStorage.getItem('storage_displayCaptions') == 'true') {
                 document.getElementById('willCreateCaptions').checked = true
             }
 
             if (localStorage.getItem('storage_captionColor')) {
-                document.getElementById('cap_textcolor').value = localStorage.getItem('storage_captionColor')
+                 document.getElementById('cap_textcolor').value = localStorage.getItem('storage_captionColor')
             }
             if (localStorage.getItem('storage_captionSize')) {
-                document.getElementById('cap_textsize').value = localStorage.getItem('storage_captionSize')
+                 document.getElementById('cap_textsize').value = localStorage.getItem('storage_captionSize')
             }
             if (localStorage.getItem('storage_captionFont')) {
-                document.getElementById('cap_font').value = localStorage.getItem('storage_captionFont')
+                 document.getElementById('cap_font').value = localStorage.getItem('storage_captionFont')
             }
             if (localStorage.getItem('storage_captionShadow')) {
-                document.getElementById('cap_textshadow').value = localStorage.getItem('storage_captionShadow')
+                 document.getElementById('cap_textshadow').value = localStorage.getItem('storage_captionShadow')
             }
             if (localStorage.getItem('storage_captionAlign')) {
-                document.getElementById('cap_align').value = localStorage.getItem('storage_captionAlign')
+                 document.getElementById('cap_align').value = localStorage.getItem('storage_captionAlign')
             }
 
             if (localStorage.getItem('storage_captionPlacement')) {
-                    document.getElementById('cap_placement').value = localStorage.getItem('storage_captionPlacement')
+                document.getElementById('cap_placement').value = localStorage.getItem('storage_captionPlacement')
             }
 
             if (localStorage.getItem('storage_boldcaps') == 'true') {
@@ -559,20 +706,16 @@
             }
 
             if (localStorage.getItem('storage_videoEndOption')) {
-                console.log('sd')
                 document.getElementById('videoLoop').checked = false
                 switch(localStorage.getItem('storage_videoEndOption')) {
                     case "loop":
                         document.getElementById('videoLoop').checked = true
-                        console.log('1')
                     break;
                     case "change":
                         document.getElementById('videoChange').checked = true
-                        console.log('2')
                     break;
                     case "close":
                         document.getElementById('videoClose').checked = true
-                        console.log('3')
                     break;
                 }
             }

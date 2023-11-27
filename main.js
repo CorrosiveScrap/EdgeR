@@ -1,4 +1,4 @@
-const { app, ipcMain, Menu, Tray, BrowserWindow, screen, dialog } = require('electron');
+const { app, ipcMain, Menu, Tray, BrowserWindow, screen, dialog, globalShortcut} = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -224,6 +224,10 @@ app.whenReady().then(() => {
 
     let contextMenu = Menu.buildFromTemplate(trayTemplate);
     tray.setContextMenu(contextMenu);
+
+    globalShortcut.register('F11', () => {
+        console.log('Full screen is disabled');
+    });
 });
 
 
@@ -239,6 +243,7 @@ app.on('window-all-closed', () => {
 
 // Handle the quit button in index.html
 ipcMain.handle('quit-app', () => {
+    globalShortcut.unregisterAll();
     app.quit();
 });
 
@@ -605,7 +610,7 @@ var discordState
 DiscordRPC.register(clientId);
 
 async function setActivity() {
-    console.log('Setting actuvity')
+    //console.log('Setting actuvity')
     RPC.setActivity({
         details: discordDetails,
         state: discordState,
@@ -640,7 +645,7 @@ ipcMain.on('discordSettings', (event, display, discDetails, discState) => {
 });
 
 RPC.on('ready', async () => {
-    //setActivity()
+    setActivity()
 })
 
 RPC.login({ clientId }).catch(err => console.error(err))

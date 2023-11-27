@@ -9,20 +9,41 @@
     <!--
         Hello. This file is such a huge over complicated cluster fuck of code that even I dont really understand how it works.
         If you plan to try and decode what the fuck is going on here good luck! I've labeled best I can for you but it will probably still be a nightmare.
-
-        When page is loaded the old saved array is kept but the visual representations do not get created nor work because of the array be populated with previus saves
     -->
 
     <style>
+        body {
+            background-image: url('img/indexBackground.png');
+            cursor: default;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
         button {
             cursor: pointer;
             font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            background-color: #cbcbcb;
-            border: 2px solid black;
-            width: 150px;
-            height: 50px;
+            position: relative;
+            overflow: hidden;
+            width: 200px;
+            height: 75px;
             font-size: 25px;
+            border: none;
             border-radius: 10px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+
+            transition: width 0.2s ease-in-out, height 0.2s ease-in-out, border 0.2s ease-in-out;
+        }
+
+        button:hover {
+            width: 240px;
+            height: 95px;
+            border: 2px solid white
         }
 
         .item {
@@ -45,8 +66,50 @@
             border-radius: 5%;
         }
     </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            document.body.classList.add('loaded');
+            startGradientEffect();
+        });
+    
+        let colorHue = 220;
+        let gradientPos = 0
+        let smooth = true
+    
+        function changeHue() {
+            gradientPos++
+
+            if (gradientPos >= 360) {
+                gradientPos = 0
+            }
+
+            if (smooth == true) {
+                colorHue++
+            } else if (smooth == false) {
+                colorHue--
+            }
+
+            if (colorHue >= 250) {
+                smooth = false
+            } else if (colorHue <= 190) {
+                smooth = true
+            }
+            
+            const gradientColor = `linear-gradient(${gradientPos}deg, hsl(${colorHue}, 100%, 50%), hsl(${colorHue + 60}, 100%, 50%))`;
+
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.style.background = gradientColor;
+            });
+        }
+
+        function startGradientEffect() {
+            setInterval(changeHue, 100);
+        }
+    </script>
 </head>
 <body>
+    <div style="background-color: rgba(0, 0, 0, 0.524); position: fixed; top: 0; left: 0; height: 100%; width: 100%; z-index: -5;"></div>
     <h1 align="center">Caption editor</h1>
 
     <div id="listContainer" align="left" style="margin-left: 25%;">
