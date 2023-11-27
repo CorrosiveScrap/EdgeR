@@ -29,9 +29,11 @@ EdgeR is fetishware that continuously spammes the user with image, video, and au
 
 
 # Downloads
-> - [v0.8.4 - Zip](https://github.com/700Maps/EdgeR/releases/download/V0.8.3-beta/EdgeR.v0.8.4.zip)
-> - [v0.8.4 - Source code](https://github.com/700Maps/EdgeR/archive/refs/tags/V0.8.3-beta.zip)
+> - [v0.8.5 - zip](https://github.com/700Maps/EdgeR/releases/download/V0.8.5-beta/EdgeR.v0.8.5.zip)
 
+
+
+> - [v0.8.4 - Zip](https://github.com/700Maps/EdgeR/releases/download/V0.8.3-beta/EdgeR.v0.8.4.zip)
 
 
 
@@ -48,8 +50,19 @@ EdgeR is under the [MIT licence](https://github.com/700Maps/EdgeR/blob/main/LICE
 
 # Versions
 
+**V0.8.5**
+> - Buttons now have a moving gradient as the background color
+> - Home page now fades in 
+> - Animated css trasitions on buttons when hovered over
+> - Better prefrences UI
+> - Text can no longer be selected in the splash screen
+> - Fixed frequency not being set when sliders were used
+> - Fixed display captions always becoming enabled
+> - Masive optimizations to index.html
+
 **V0.8.4**
 > - Fixed the tray icon not loading
+> - Removed a leftover test caption
 
 **V0.8.3 - Shapeshift**
 > - Close button can now be disabled
