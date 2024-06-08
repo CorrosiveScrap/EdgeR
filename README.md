@@ -29,6 +29,9 @@ EdgeR is fetishware that continuously spammes the user with image, video, and au
 
 
 # Downloads
+> - [v0.9.0 - zip](https://github.com/700Maps/EdgeR/releases/download/V0.9.0-beta/EdgeR.V0.9.zip)
+
+
 > - [v0.8.5 - zip](https://github.com/700Maps/EdgeR/releases/download/V0.8.5-beta/EdgeR.v0.8.5.zip)
 
 
@@ -49,6 +52,12 @@ EdgeR is under the [MIT licence](https://github.com/700Maps/EdgeR/blob/main/LICE
 
 
 # Versions
+
+**V0.9.5 - Lockdown**
+> - Close button can now be set to open more pop ups
+> - EdgeR now has the option to be loaded whenever your pc is booted up
+> - Fixed EdgeR to not allow for multiple instances of main.js *(You cant load the app twice)*
+> - Can now require a password to use tray options
 
 **V0.8.5**
 > - Buttons now have a moving gradient as the background color
