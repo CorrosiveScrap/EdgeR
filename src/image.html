@@ -37,7 +37,7 @@
 <body onload="fadeTime()">
     <p id="caption"></p>
     <img id="background" src="" alt="You have not set an image folder in prefrences or there are no images in the folder you selected" style="color: white;">
-    <button id="closeButton" onclick="closeWindow()" style="display: block;" class="">I submit</button>
+    <button id="closeButton" style="display: block;" class="">I submit</button>
 
     <script>
         const images = JSON.parse(localStorage.getItem('storage_images'))
@@ -126,17 +126,10 @@
                     console.log(timer)
 
                     if (timer == 0) {
-                        closeWindow()
+                        window.close();
                     }
                 }
             }, 1000)
-        }
-
-
-
-        // Close the window once the button is clicked
-        function closeWindow() {
-            window.close();
         }
     </script>
 </body>

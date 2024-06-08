@@ -12,6 +12,10 @@ a {
     font-weight: bold;
 }
 
+a:hover {
+    color: rgb(119, 205, 242);
+}
+
 /*This is the class that hids stuff in index.html*/
 .hidden {
     display: none;

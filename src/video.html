@@ -37,7 +37,7 @@
 <body onload="fadeTime(), resizeVideoWindow()">
     <p id="caption"></p>
     <video id="background" src="" autoplay muted loop alt="Couldnt find any videos. Please make sure you have a folder selected in swap material and has the correct type of material inside it"></video>
-    <button id="closeButton" onclick="closeWindow()" style="display: block;" class="">Close</button>
+    <button id="closeButton" style="display: block;" class="">Close</button>
     
 
     <script>
@@ -161,15 +161,10 @@
                     console.log(timer)
 
                     if (timer == 0) {
-                        closeWindow()
+                        window.close();
                     }
                 }
             }, 1000)
-        }
-
-        // This closes the window once the button is clicked
-        function closeWindow() {
-            window.close();
         }
     </script>
 </body>

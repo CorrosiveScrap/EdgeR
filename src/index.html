@@ -102,7 +102,7 @@
         }
     </script>
 </head>
-<body onload="loadPrefrences()">
+<body onload="loadPrefrencesNew(), loadPrefrences()">
     <center>
         <div style="background-color: rgba(0, 0, 0, 0.524); position: fixed; top: 0; left: 0; height: 100%; width: 100%; z-index: -5;"></div>
     </center>
@@ -115,9 +115,9 @@
             <button onclick="swapPage(this)">Extra</button> <br><br>
             <button id="closeApp">Quit</button>
             
-<!--
+            <!--
             <br><br><br> <br><br> <button id="test">Test</button>
--->
+            -->
 
             <br><br>
             &copy; 700Maps
@@ -146,30 +146,33 @@
                     </center>
 
                     <div style="display: flex;">
+
                         <div style="flex-basis: 33%;">
-                                <u>Type of media created</u> <br>
+                                <u title="Enable and disable diferent forms of media displayed inside pop ups">Type of media created</u> <br>
                                 Create images <input type="checkbox" id="willCreateImages" checked> <br>
                                 Create videos <input type="checkbox" id="willCreateVideos"> <br>
                                 Create audio <input type="checkbox" id="willCreateAudio"> <br>
                         </div>
 
                         <div style="flex-basis: 33%;">
-                            <u>Creation rate</u> <br>
-                            Create all <input type="radio" name="createAmountOfMedia" id="createAll" value="" checked> <br>
-                            Create one <input type="radio" name="createAmountOfMedia" id="createOne" value=""> <br>
-                            Create amount <input type="radio" name="createAmountOfMedia" id="createAmount" value=""> <br>
-                            Amount created <input type="number" id="creationAmount" style="width: 35px;" placeholder="5">
+                            <u title="Customize how may pop ups to recive at one time and what the contain">Creation rate</u> <br>
+                            <div title="This will create one of each type of media selected">Create all <input type="radio" name="createAmountOfMedia" id="createAll" value="" checked></div>
+                            <div title="This will create only one pop up with any type of selected media inside">Create one <input type="radio" name="createAmountOfMedia" id="createOne" value=""></div>
+                            <div title="This will create a custom amount of pop ups (1 - 99) with a random kind of enabled media inside">Create amount <input type="radio" name="createAmountOfMedia" id="createAmount" value=""></div>
+                            <div title="This will be the number of pop ups created if Create amount is selected">Amount created <input type="number" id="creationAmount" style="width: 35px;" placeholder="5"></div>
                         </div>
+
                         <div style="flex-basis: 33%;">
                             <u>Window fading</u> <br>
                             Enable fading <input id="doesWindowFade" type="checkbox"> <br>
                             Fade out after <input type="number" id="fadeTimeInput" placeholder="60" style="width: 50px;" onblur="loadSliders()"> seconds<br>
                             <input class="slider" style="width: 100%;" id="fadeslider" type="range" min="1" max="120" value="60" oninput="document.getElementById('fadeTimeInput').value = this.value">
                         </div>
-                </div>
+
+                    </div>
                 <hr>
                 <div style="display: flex;">
-                    <div style="flex-basis: 50%;">
+                    <div style="flex-basis: 60%;">
                         <u>Pop up clock</u><br>
                         Random pop up time <input id="frequencyToggle" type="checkbox" onclick="changeFrequency()"><br>
 
@@ -184,6 +187,10 @@
                         <input class="slider" id="frequencyslider02" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency02').value = this.value">
                         <input class="slider" id="frequencyslider03" type="range" min="1" max="300" value="5" class="slider" oninput="document.getElementById('frequency03').value = this.value">
                         </div>
+                    </div>
+                    <div style="flex-basis: 40%;">
+                        <u>Launch</u><br>
+                        Open on start <input id="openOnPcStart" type="checkbox">
                     </div>
                 </div>
             </div>
@@ -226,6 +233,7 @@
                         <div style="flex-basis: 33%;">
                             <u>Close button</u><br>
                             Disable<input id="closeToggle" type="checkbox"><br>
+                            Reverse close<input id="reverseCloseToggle" type="checkbox"><br>
                             Button text <input type="text" id="closeButtonTextInput" style="width: 100px;" placeholder="I submit <3"> <br>
                             Location
                             <select id="closeButtonLocation">
@@ -267,35 +275,63 @@
                 <div id="prefrencesMoreControl" class="menuPages">
                     <center><h1>More control</h1></center>
                     <div style="display: flex;">
-                        <div style="flex-basis: 33%;">
-                            <p>No current content stay tuned for more updates</p>
-                        </div>
-                    </div>
-                </div>
-                    <!--
-                    <div style="display: flex;">
                         <div style="flex-basis: 60%;">
+                            <p>No content yet.</p>
+                            <p>This page will be used for integration with EdgeR Plus</p>
+                            <!--
                             <u>Connect to EdgeR controler</u> <br>
                             Controler password <input type="password">
+                            -->
                         </div>
                         <div style="flex-basis: 40%;">
+                            <!--
                             <u>Control settings</u> <br>
                             Minimal EdgeR access<input type="radio" checked><br>
                             Full RdgeR access<input type="radio"><br>
                             Access to pc<input type="radio"><br>
                             Full pc control<input type="radio">
+                            -->
                         </div>
                     </div>
                 </div>
-                -->
 
                 <div id="prefrencesDangerZone" class="menuPages">
                     <center><h1>Danger Zone</h1></center>
 
                     <div style="display: flex;">
+                        <!--
                         <div style="flex-basis: 33%;">
-                            <p>No current content stay tuned for more updates</p>
+                            <u>Lock pc</u><br>
+                            Enable <input type="checkbox" id="lockMode"> <br>
+                            Allow ristricted mode <input type="checkbox"> <br>
+                            Lock time: <input type="text" size="3px" placeholder="20" id="lockModeStart"> to <input type="text" size="3px" placeholder="6" id="lockModeEnd">
+                            Password <input type="text" id="lockModePassword" placeholder="Password">
                         </div>
+                        <div style="flex-basis: 33%;">
+                            <u>Ristricted mode whitelist</u><br>
+                            <textarea cols="30" rows="7">brave.exe</textarea>
+                        </div>
+                        -->
+                    </div>
+                    <hr>
+                    <div style="display: flex;">
+                        <div style="flex-basis: 50%;">
+                            <u>Lock EdgeR</u><br>
+                            <!--find me
+                            Require password to change settings <input type="checkbox"> <br>
+                            Require password to use tray buttons <input type="checkbox"> <br>
+                            Require password to remove from pc <input type="checkbox"> <br>
+                            Blacklist selected apps <input type="checkbox"> <br>
+                            -->
+                            Require password to use tray options <input type="checkbox" id="lockTray"> <br>
+                            Password <input type="text" id="trayPass" placeholder="Password">
+                        </div>
+                        <!--
+                        <div style="flex-basis: 33%;">
+                            <u>Blacklist</u><br>
+                            <textarea cols="30" rows="7">RiotClientServices.exe</textarea>
+                        </div>
+                        -->
                     </div>
                 </div>
 
@@ -416,9 +452,10 @@
     <div id="Extra" class="hidden">
         <center>
             <h1 style="font-size: 63px;">Extra</h1>
-            <a href="https://github.com/700Maps/EdgeR" target="_blank">EdgeR Github</a> <br><br>
-            <a href="versions.html" target="_blank">Version history</a> <br><br>
-            <a href="https://twitter.com/700mps" target="_blank" title="I fucking hate that I have to refer to this website as X">My twitter / X</a> <br><br>
+            <a href="https://github.com/700Maps/EdgeR" target="_blank" style="font-size: 25px;">EdgeR Github</a> <br><br>
+            <a href="versions.html" target="_blank" style="font-size: 25px;">Version history</a> <br><br>
+            <a href="updates.html" target="_blank" style="font-size: 25px;">Updates</a> <br><br>
+            <a href="https://twitter.com/700mps" target="_blank" title="I fucking hate that I have to refer to this website as X" style="font-size: 25px;">My twitter / X</a> <br><br>
             <br>
             <button onclick="home()">Back</button>
         </center>
@@ -513,6 +550,9 @@
             const ftog = document.getElementById('frequencyToggle').checked
             setLocalStorageItem('storage_typeOfFrequency', ftog)
 
+            const openAtStart = document.getElementById('openOnPcStart').checked
+            setLocalStorageItem('storage_startOnOpen', openAtStart)
+
             const creationType = (() => {
                 if (document.getElementById('createAll').checked) return JSON.stringify(3);
                 if (document.getElementById('createOne').checked) return JSON.stringify(1);
@@ -544,6 +584,9 @@
             //Edit media
             const cls = document.getElementById('closeToggle').checked
             setLocalStorageItem('storage_closeAbilitie', cls)
+
+            const rcls = document.getElementById('reverseCloseToggle').checked
+            setLocalStorageItem('storage_reverseCloseMode', rcls)
 
             const caps = document.getElementById('willCreateCaptions').checked
             setLocalStorageItem('storage_displayCaptions', caps)
@@ -587,7 +630,24 @@
 
             //More control
 
-            //Danger zone
+            //Danger zone find me
+            // const locked = document.getElementById('lockMode').checked
+            // setLocalStorageItem('storage_lockMode', locked)
+
+            //setLocalStorageItem('storage_lockModeStart', getElementValue('lockModeStart'))
+
+            // JSON.stringify(localStorage.setItem('storage_lockModeStart', getElementValue('lockModeStart')))
+
+            // JSON.stringify(localStorage.setItem('storage_lockModeEnd', getElementValue('lockModeEnd')))
+
+            //setLocalStorageItem('storage_lockModeEnd', getElementValue('lockModeEnd'))
+
+            //setLocalStorageItem('storage_lockModePassword', getElementValue('lockModePassword'))
+
+            const lockedtray = document.getElementById('lockTray').checked
+            setLocalStorageItem('storage_lockTray', lockedtray)
+
+            setLocalStorageItem('storage_lockTrayPass', getElementValue('trayPass'))
 
             //Discord rich presence
             const showOndis = document.getElementById('showOnDiscord').checked
@@ -621,6 +681,7 @@
                 }
             }
 
+
             setValueFromLocalStorage('frequency', 'storage_frequency');
             setValueFromLocalStorage('frequency02', 'storage_frequency02');
             setValueFromLocalStorage('frequency03', 'storage_frequency03');
@@ -630,8 +691,6 @@
 
 
         function loadPrefrences() {
-            loadPrefrencesNew()
-
             if (localStorage.getItem('storage_ifFade') == 'true') {
                 document.getElementById('doesWindowFade').checked = true;
             }
@@ -664,9 +723,17 @@
             if (localStorage.getItem('storage_countType') == 'true') {
                 document.getElementById('countInMs').checked = true;
             }
-
+            
             if (localStorage.getItem('storage_closeAbilitie') == 'true') {
                 document.getElementById('closeToggle').checked = true;
+            }
+
+            if (localStorage.getItem('storage_reverseCloseMode') == 'true') {
+                document.getElementById('reverseCloseToggle').checked = true;
+            }
+
+            if (localStorage.getItem('storage_startOnOpen') == 'true') {
+                document.getElementById('openOnPcStart').checked = true;
             }
 
             if (localStorage.getItem('storage_closeLocation')) {
@@ -675,6 +742,31 @@
 
             if (localStorage.getItem('storage_displayCaptions') == 'true') {
                 document.getElementById('willCreateCaptions').checked = true
+            }
+
+            //find me
+            // if (localStorage.getItem('storage_lockMode') == 'true') {
+            //     document.getElementById('lockMode').checked = true
+            // }
+
+            // if (localStorage.getItem('storage_lockModeStart')) {
+            //      document.getElementById('lockModeStart').value = localStorage.getItem('storage_lockModeStart')
+            // }
+
+            // if (localStorage.getItem('storage_lockModeEnd')) {
+            //      document.getElementById('lockModeEnd').value = localStorage.getItem('storage_lockModeEnd')
+            // }
+
+            // if (localStorage.getItem('storage_lockModePassword')) {
+            //      document.getElementById('lockModePassword').value = localStorage.getItem('storage_lockModePassword')
+            // }
+
+            if (localStorage.getItem('storage_lockTray') == 'true') {
+                document.getElementById('lockTray').checked = true
+            }
+
+            if (localStorage.getItem('storage_lockTrayPass')) {
+                 document.getElementById('trayPass').value = localStorage.getItem('storage_lockTrayPass')
             }
 
             if (localStorage.getItem('storage_captionColor')) {
@@ -769,8 +861,6 @@
             if (localStorage.getItem('storage_usingDiscordState') == 'true') {
                 document.getElementById('stateToggle').checked = true
             }
-
-            //find me
 
             if (localStorage.getItem('storage_minimumPopupSize')) {
                 document.getElementById('popupMinSize').value = localStorage.getItem('storage_minimumPopupSize')

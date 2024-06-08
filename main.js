@@ -1,13 +1,22 @@
-const { app, ipcMain, Menu, Tray, BrowserWindow, screen, dialog, globalShortcut} = require('electron');
+const { app, ipcMain, Menu, Tray, BrowserWindow, screen, dialog, globalShortcut, powerSaveBlocker} = require('electron');
+const Store = require('electron-store');
 const path = require('path');
 const fs = require('fs');
 
 // Get rid of the default menu at the top of all windows
 Menu.setApplicationMenu(false);
 
-// Settings for the home screen
+// Quit this instance of edger if edger is already running
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+}
+
+let win
+
+// Configuration for windows
 function createWindow() {
-    const win = new BrowserWindow({
+     win = new BrowserWindow({
         width: 700,
         height: 800,
         //frame: false,
@@ -19,11 +28,13 @@ function createWindow() {
         }
     });
 
+    const id = powerSaveBlocker.start('prevent-app-suspension');
+
     win.loadFile('src/index.html');
 }
 
 ipcMain.handle('capeditoropen', () => {
-    const win = new BrowserWindow({
+    const win6 = new BrowserWindow({
         width: 600,
         height: 700,
         //frame: false,
@@ -35,10 +46,9 @@ ipcMain.handle('capeditoropen', () => {
         }
     });
 
-    win.loadFile('src/caption-editor.html');
+    win6.loadFile('src/caption-editor.html');
 });
 
-// Settings for the image popups
 function createImageWindow() {
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
@@ -64,7 +74,7 @@ function createImageWindow() {
         alwaysOnTop: true,
         skipTaskbar: true,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'popup-preload.js'),
             devTools: false
         }
     });
@@ -76,8 +86,6 @@ function createImageWindow() {
     });
 }
 
-
-// Settings for the video popups
 function createVideoWindow() {
 
     const primaryDisplay = screen.getPrimaryDisplay();
@@ -105,7 +113,7 @@ function createVideoWindow() {
         alwaysOnTop: true,
         skipTaskbar: true,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'popup-preload.js'),
             devTools: false
         }
     });
@@ -118,7 +126,6 @@ function createVideoWindow() {
         win3.restore();
     });
 }
-
 
 function createAudioWindow() {
 
@@ -148,7 +155,7 @@ function createAudioWindow() {
         skipTaskbar: true,
         show: showaudio,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'popup-preload.js'),
             devTools: false
         }
     });
@@ -161,15 +168,16 @@ function createAudioWindow() {
     });
 }
 
+let win5
 
 function createblockedWindow() {
 
-    const win5 = new BrowserWindow({
+    win5 = new BrowserWindow({
         kiosk: true,
         frame: false,
         skipTaskbar: true,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.join(__dirname, 'popup-preload.js'),
             devTools: false
         }
     });
@@ -185,8 +193,71 @@ function createblockedWindow() {
     });
 }
 
+let win7
 
-// Build the tray options and open index.html by default
+let noPass = false
+ipcMain.on('userHasNoPass', (choice) => {
+    noPass = true
+    console.log(noPass)
+})
+
+function createpasswordwindow(type) {
+
+    win7 = new BrowserWindow({
+        //kiosk: true,
+        //frame: false,
+        width: 600,
+        height: 700,
+        skipTaskbar: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'pass-preload.js'),
+            //devTools: false
+        }
+    });
+
+    win7.loadFile('src/password.html');
+
+    // Must be set here because otherwise the taskbar is visible with kiosk
+    win7.setAlwaysOnTop(true);
+
+    // When minimized, immediately restore the window 
+    win7.on('minimize', () => {
+        win7.restore();
+    });
+
+    win7.on('closed', () => {
+        if (noPass == false) {
+            switch(type) {
+                case 'Splash':
+                    createWindow()
+                break;
+                case 'Freeze':
+                    clearInterval(clock)    
+                break;
+                case 'Resume':
+                    clearInterval(clock)
+                    startClock()
+                break;
+                case 'Clear':
+                    let windows = BrowserWindow.getAllWindows();
+                    windows.forEach(window => {
+                        if (window !== win) { // Avoid closing the main window
+                        window.close();
+                        }
+                    });
+                break;
+                case 'Quit':
+                    quitEdgeR()
+                break;
+            }
+        } else {
+            noPass = false;
+        }
+    })
+}
+
+
+// Open splash screen on launch, build tray options, and set up hotkeys
 app.whenReady().then(() => {
     createWindow();
 
@@ -196,29 +267,42 @@ app.whenReady().then(() => {
     let trayTemplate = [
         {
             label: 'Splash screen',
-            click: createWindow
+            click: () => {
+                if (trayLock == true) {createpasswordwindow('Splash')} else {createWindow()}
+            }
         },
         { 
             label: 'Freeze' ,
             click: () => {
-                clearInterval(clock)
+                if (trayLock == true) {createpasswordwindow('Freeze')} else {clearInterval(clock)}
             }
         },
         { 
              label: 'Resume' ,
              click: () => {
-                clearInterval(clock)
-                startClock()
+                if (trayLock == true) {createpasswordwindow('Resume')} else {clearInterval(clock), startClock()}
+                
              }
         },
-        // { 
-        //     label: 'Clear screen' ,
-        //     click: () => {
-        //     }
-        // },
+        { 
+            label: 'Clear screen' ,
+            click: () => {
+                if (trayLock == true) {createpasswordwindow('Clear')} else {
+                    let windows = BrowserWindow.getAllWindows();
+                    windows.forEach(window => {
+                        if (window !== win) { // Avoid closing the main window
+                        window.close();
+                        }
+                    });
+                } 
+            }
+        },
         {
             label: 'Quit',
-            click: app.quit
+            click: () => {
+                if (trayLock == true) {createpasswordwindow('Quit')} else {quitEdgeR()}
+                
+             }
         }
     ];
 
@@ -228,28 +312,72 @@ app.whenReady().then(() => {
     globalShortcut.register('F11', () => {
         console.log('Full screen is disabled');
     });
+    globalShortcut.register('ALT + P', () => {
+        let windows = BrowserWindow.getAllWindows();
+        windows.forEach(window => {
+            if (window !== win) { // Avoid closing the main window
+            window.close();
+            }
+        });
+    });
 });
 
+let trayLock = false
 
+ipcMain.on('trayIsLocked', (choice) => {
+    trayLock = true
+})
 
+ipcMain.on('trayIsUnocked', (choice) => {
+    trayLock = false
+})
 
+// Place and remove EdgeR from startup folder
+ipcMain.on('autoStartSettings', (choice) => {
+    const appPath = app.getPath('exe');
+    const appName = path.basename(appPath);
+    const startupFolderPath = path.join(app.getPath('appData'), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup');
+    const shortcutPath = path.join(startupFolderPath, `${appName}.lnk`);
 
-// This stops windows from automatically closing the app when there are no open windows
+    if (!fs.existsSync(shortcutPath)) {
+        const shell = require('electron').shell;
+        shell.writeShortcutLink(shortcutPath, 'create', {
+          target: appPath,
+          args: '',
+          description: 'EdgeR',
+          icon: "src/img/icon.ico",
+        });
+    
+        if (choice === 'true') {
+            Store.set('autoStart', true);
+        } else {
+            Store.set('autoStart', false);
+        }
+    }
+})
+
+// Make sure EdgeR isnt auto closed when no windows are open
 app.on('window-all-closed', () => {
 });
 
-
-
-
 // Handle the quit button in index.html
 ipcMain.handle('quit-app', () => {
-    globalShortcut.unregisterAll();
-    app.quit();
+    quitEdgeR();
 });
 
+// Unregister all shortcuts, make sure start on open is not blocked, and quit the app
+function quitEdgeR() {
+    console.log('sd')
+    globalShortcut.unregisterAll();
+    //powerSaveBlocker.stop(id);
+    const allWebContents = BrowserWindow.getAllWindows().map(win => win.webContents);
+    allWebContents.forEach(webContents => {
+        webContents.send('set-opened-state');
+    });
+    app.quit();
+}
 
-
-// Open and grab shit form focking folder omfg sadalisujdja
+// Open and recieve image folder
 ipcMain.on('getimages', (event) => {
     console.log('arrived')
 
@@ -282,7 +410,7 @@ ipcMain.on('getimages', (event) => {
     });
 });
 
-
+// Open and recieve video folder
 ipcMain.on('getvideos', (event) => {
     console.log('arrived')
 
@@ -315,7 +443,7 @@ ipcMain.on('getvideos', (event) => {
     });
 });
 
-
+// Open and recieve audio folder
 ipcMain.on('getaudios', (event) => {
     console.log('arrived')
 
@@ -465,7 +593,7 @@ ipcMain.handle('activeOn', () => {
 var popupMinSize
 var popupMaxSize
 
-ipcMain.on('updateSettings', (event, frequency, frequency02, frequency03, randomFrequency, useMs, imageCreate, videoCreate, audioCreate, createType, audioDisplay, minSize, maxSize) => {
+ipcMain.on('updateSettings', (event, frequency, frequency02, frequency03, randomFrequency, useMs, imageCreate, videoCreate, audioCreate, createType, audioDisplay, minSize, maxSize, firstLockNumber, secondLockNumber) => {
     if (useMs == false) {
         timer = frequency * 1000;
     } else {
@@ -482,6 +610,9 @@ ipcMain.on('updateSettings', (event, frequency, frequency02, frequency03, random
     popupMinSize = minSize
     popupMaxSize = maxSize
 
+    lockOutStart = firstLockNumber
+    lockOutEnd = secondLockNumber
+
     if (audioDisplay == 'true') {
         showaudio = false
     } else {
@@ -490,7 +621,62 @@ ipcMain.on('updateSettings', (event, frequency, frequency02, frequency03, random
 
     createAmount = createType
     console.log('Updated settings: \nFrequency: ', timer + '\nImages: ' + imageCreate + '\nVideos: ' + videoCreate + '\nAudio: ' + audioCreate + '\nAmount to create: ' + createType + '\nMin size: ' + minSize + '\nMax size: ' + maxSize);
+    console.log(lockOutStart, lockOutEnd)
+
+    // const uninstallExePath = path.join(__dirname, 'Uninstall edger.exe');
+
+    // if (fs.existsSync(uninstallExePath)) {
+    // fs.unlink(uninstallExePath, (err) => {
+    //     if (err) {
+    //     console.error('Error removing uninstall.exe:', err);
+    //     } else {
+    //     console.log('uninstall.exe removed successfully!');
+    //     }
+    // });
+    // }
 });
+
+function getCurrentTime() {
+    return new Date().getHours();
+    //return new Date().toLocaleTimeString();
+  }
+  
+
+let clock02
+
+let lockOutStart
+let lockOutEnd
+lockedOut = false
+
+function startClock02() {
+    // if (lockOutEnd == 0 && lockOutEnd == 0) {
+    //     console.log("Lcok error")
+    // } else {
+    //     clock02 = setInterval(function () {
+    //         x = getCurrentTime()
+
+    //         if (lockedOut == false) {
+    //             if (x <= lockOutEnd || x >= lockOutStart) {
+    //                 console.log('Current time ' + x);
+    //                 console.log('Lock starts at ' + lockOutStart)
+    //                 createblockedWindow()
+    //                 lockedOut = true
+    //             }
+    //         }
+
+    //         // if (lockedOut == true) {
+    //         //     if (x >= lockOutEnd && x <= lockOutStart) {
+    //         //         console.log('cosed')
+    //         //         //win5.close();
+    //         //         lockedOut = false
+    //         //     }
+    //         // }
+    //     }, 1000)
+    // }
+    
+}
+
+startClock02()
 
 function startClock() {
     clock = setInterval( function() {
@@ -586,14 +772,97 @@ function startClock() {
     }, timer)
 }
 
+
+ipcMain.handle('openNewWindow', () => {
+    switch (createAmount) {
+        case 3:
+            if (images == true) {
+                createImageWindow()
+            }
+            if (videos == true) {
+                createVideoWindow()
+            }
+            if (audio == true) {
+                createAudioWindow()
+            }
+        break;
+        case 1:
+            temp2 = Math.floor(Math.random() * 3) + 1
+            switch (temp2) {
+                case 1:
+                    if (images == true) {
+                        createImageWindow()
+                    }
+                    if (images == false && videos == true) {
+                        createVideoWindow()
+                    }
+                    if (images == false && videos == false) {
+                        createAudioWindow()
+                    }
+                break;
+                case 2:
+                    if (videos == true) {
+                        createVideoWindow()
+                    }
+                    if (videos == false && images == true) {
+                        createImageWindow()
+                    }
+                    if (videos == false && images == false) {
+                        createAudioWindow()
+                    }
+                break;
+                case 3:
+                    if (audio == true) {
+                        createAudioWindow()
+                    }
+                    if (audio == false && images == true) {
+                        createImageWindow()
+                    }
+                    if (audio == false && images == false) {
+                        createVideoWindow()
+                    }
+                break;
+            }
+        break;
+        default:
+            tempar = []
+            if (images == true) {
+                tempar.push('images')
+            }
+            if (videos == true) {
+                tempar.push('videos')
+            }
+            if (audio == true) {
+                tempar.push('audio')
+            }
+
+            for (let i = 0; i < createAmount; i++) {
+                temp3 = tempar[Math.floor(Math.random() * tempar.length)]
+                switch (temp3) {
+                    case 'images':
+                        createImageWindow()
+                    break;
+                    case 'videos':
+                        createVideoWindow()
+                    break;
+                    case 'audio':
+                        createAudioWindow()
+                    break;
+                }
+            }
+        break;
+    }
+});
+
 // This is a command that I used for debugging its connected to a button in index.html thats commented out
 ipcMain.handle('test', () => {
     for (let i = 0; i < 1; i++) {
-        createVideoWindow()
+        //createVideoWindow()
         //createImageWindow()
         //createAudioWindow()
 
         //createblockedWindow()
+        createpasswordwindow()
     }
 });
 
