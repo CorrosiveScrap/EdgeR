@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            background: black;
+            color: white;
+        }
+
+        #wheelContainer {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        #wheelContainer::before {
+            position: absolute;
+            content: '';
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        #wheelSegments {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+
+            animation: spin 4.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        #wheelSegments p {
+            position: absolute;
+            font-size: 75%;
+            top: 0%;
+            left: 55%;
+            z-index: 100;
+            color: white;
+        }
+
+        .boundingChecker {
+            position: absolute;
+            top: 0%;
+            background: red;
+            z-index: 102;
+            width: 25px;
+            height: 25px;
+            left: 50%;
+            opacity: 0;
+        }
+
+        #wheelContainer::after {
+            content: '';
+            position: absolute;
+            top: 25%;
+            left: 95%;
+            background: white;
+            width: 100px;
+            height: 100px;
+
+            transform: rotate(180deg);
+            clip-path: polygon(50% 50%, 50% 0%, 100% 25%);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(var(--stratDeg, 0deg));
+            }
+            100% {
+                transform: rotate(var(--endDeg, 10));
+            }
+        }
+
+        .segment {
+            position: absolute;
+            width: 120%; 
+            height: 120%;
+            top: -10%;
+            left: -10%;
+            font-size: 62px;
+            justify-content: center;
+            color: white;
+            opacity: 1;
+
+            display: flex;
+            align-items: center;
+        }
+
+        .segment:hover {
+            opacity: 1;
+        }
+
+        .segmentText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-70%, 100%) rotate(-90deg); /* Rotate properly */
+            text-align: center;
+            font-size: 50% !important; /* Adjust size dynamically */
+            font-weight: bold;
+            color: black;
+            white-space: nowrap;
+            max-width: 80%; /* Prevent overflow */
+        }
+
+        #rewardChecker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: 48%;
+            left: 95%;
+            background: blue;
+            opacity: 0;
+            z-index: 101;
+        }
+
+        #levelUpRewardSelector {
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 80%;
+            height: 60%;
+            border: 2px solid white;
+            border-radius: 5%;
+            background-color: black;
+            display: none;
+            justify-content: space-around;
+        }
+
+        .levelUpRewardOption {
+            flex-basis: 30%;
+            height: 60%;
+            margin-top: 20%;
+            border: 1px solid white;
+            border-radius: 5%;
+            background-color: grey;
+            cursor: pointer;
+        }
+
+        #levelUpRewardTitleText {
+            position: absolute;
+        }
+
+        #milestonePopUp {
+            position: absolute;
+            top: 30%;
+            left: 20%;
+            width: 60%;
+            height: fit-content;
+            padding: 1%;
+            border: 2px solid white;
+            border-radius: 5%;
+            background-color: black;
+            display: none;
+        }
+
+        #milestonePopUp button {
+            cursor: pointer;
+        }
+
+        #milestoneAmountDisplay {
+            font-size: 60px;
+            margin: 0px;
+        }
+
+        #warningPopup {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            background-color: black;
+            display: none;
+        }
+
+        a, a:visited, a:hover {
+            color: pink;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1 id="result">Amount</h1>
+        <h1 id="lastRollDisplay">last</h1>
+        <h1 id="levelDisplay">Level: 1</h1>
+        <progress id="levelProgressionDisplay" max="100" value="0">0</progress>
+        <br>
+        <div id="wheelContainer" onclick="spin()" style="transform: rotate(0deg);">
+            <div id="rewardChecker"></div>
+            <div id="wheelSegments"></div>
+        </div>
+
+        <div id="levelUpRewardSelector">
+            <h1 id="levelUpRewardTitleText">LEVEL UP REWARD</h1>
+            <div class="levelUpRewardOption"></div>
+            <div class="levelUpRewardOption"></div>
+            <div class="levelUpRewardOption"></div>
+        </div>
+
+        <div id="milestonePopUp">
+            <h1>MILESTONE ACHIEVED!!</h1>
+            <h1 id="milestoneAmountDisplay">$50</h1>
+            <p id="milestoneText">Keep going</p>
+            <button onclick="document.getElementById('milestonePopUp').style.display = 'none'">CLOSE</button>
+        </div>
+
+        <div id="warningPopup">
+            <h1>BEFORE PLAYING!!!</h1>
+            <p>
+                Expect many, many bugs while playing. <br> I'm not a game developer and probably overlooked a lot of shit. <br><br> Message <u>> ME < </u> on Twitter/X to get stuff fixed (<a target="_blank" href="https://x.com/CorrosiveScrap">@CorrosiveScrap</a>)
+                <br>Don't bother anyone else with bug reports, thats my problem to deal with.
+            </p>
+            <button onclick="document.getElementById('warningPopup').style.display = 'none'">CONTINUE</button>
+        </div>
+    </center>
+
+    <script>
+        const aud_wheelTick = new Audio('aud/spin-wheelTick.mp3');
+        const aud_wheelStart = new Audio('aud/spin-wheelStart.mp3');
+        const aud_wheelEnd = new Audio('aud/spin-wheelEnd.mp3');
+
+        const aud_destorySlot = new Audio('aud/destroySlot.mp3');
+        const aud_addSlot = new Audio('aud/slotAdded.mp3');
+        const aud_cloneSlot = new Audio('aud/cloneSlot.mp3');
+        const aud_upgradeSlot = new Audio('aud/slotUpgrade.mp3');
+        const aud_downgradeSlot = new Audio('aud/slotDowngraded.mp3');
+        const aud_createSlot = new Audio('aud/slotCreated.mp3');
+
+        const aud_milestoneReached = new Audio('aud/milestone.mp3');
+        const aud_levelUp = new Audio('aud/levelUpReward.mp3');
+
+        let moneyOwed = 0;
+        let level = 1;
+        let progresion = 0;
+        let progresionIncrement = 34;
+
+        let lockWheel = false
+
+        let outcomes = [
+            [5, 'none'],
+            [5, 'none'],
+            [5, 'none'],
+            [10, 'none'],
+            [10, 'none'],
+            [15, 'upgrade'],
+            ['SAFE', 'new'],
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            buildWheel()
+            setTimeout(() => {
+            document.getElementById('warningPopup').style.display = 'block'
+            }, 1700);
+        })
+
+        async function buildWheel() {
+            lockWheel = true
+
+            for (let i = outcomes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [outcomes[i], outcomes[j]] = [outcomes[j], outcomes[i]]; // Swap elements
+            }
+
+            //console.log(outcomes)
+
+            document.querySelectorAll('.segment').forEach((segment) => {
+                segment.remove()
+            })
+
+            let segmentBackground = 0
+
+            let currentSegmentOrientation = 0
+            let segmentWidth = 360 / outcomes.length
+            //console.log(segmentWidth)
+
+            for(let i =0; i < outcomes.length; i++) {
+
+                    const newSegment = document.createElement('div')
+                    newSegment.classList.add('segment')
+                    
+
+                    const segmentText = document.createElement('p')
+                    segmentText.reward = outcomes[i][0]
+                    segmentText.innerHTML = outcomes[i][0]
+                    segmentText.classList.add('segmentText')
+                    newSegment.appendChild(segmentText)
+
+
+                    const segmentCheck = document.createElement('div')
+                    segmentCheck.classList.add('boundingChecker')
+                    newSegment.appendChild(segmentCheck)
+
+                    switch (segmentBackground) {
+                        case 0:
+                            newSegment.style.background = `rgb(152, 152, 152)`
+                        break;
+                        case 1:
+                            newSegment.style.background = `rgb(255, 171, 82)`
+                            break;
+                        case 2:
+                            newSegment.style.background = `rgb(255, 181, 208)`
+                            break;
+                        default:
+                            newSegment.style.background = `rgb(255, 228, 75)`
+                            segmentBackground = -1
+                            break;
+                    }
+                    segmentBackground++
+
+
+                    // rightSideWidth = 100 - (outcomes.length * 3.21) //Decrement
+                    // leftSideWidth = (outcomes.length * 3.21)  //Increment
+
+                    let halfAngle = segmentWidth / 2;
+
+                    // Convert angle to percentage-based width done by chatGPT because im to stupid for math :c
+                    let rightSideWidth = 50 + (50 * Math.tan(halfAngle * (Math.PI / 180)));
+                    let leftSideWidth = 50 - (50 * Math.tan(halfAngle * (Math.PI / 180)));
+                    
+                    
+                    newSegment.style.clipPath = `polygon(${rightSideWidth}% 0%, ${leftSideWidth}% 0%, 50% 50%)`
+                    newSegment.style.transform = `rotate(${currentSegmentOrientation}deg)`
+
+                    // console .log(segmentWidth)
+                    // console.log(segmentWidth / 2, 100 - (segmentWidth / 2 ))
+
+
+                    currentSegmentOrientation = currentSegmentOrientation + segmentWidth
+                    /*
+
+
+                        adjustable left - 50% down
+                        +          + adjustable right - 0% down
+
+
+                             + 50% right - 50% down
+
+
+
+                    */
+                    document.getElementById('wheelSegments').appendChild(newSegment)
+
+                    let delay = 0
+                    switch (outcomes[i][1]) {
+                        case 'none':
+                            audioClone = new Audio(aud_createSlot.src)
+                            audioClone.play()
+                            delay = 100
+                        break;
+                        case 'upgrade':
+                            audioClone = new Audio(aud_upgradeSlot.src)
+                            audioClone.play()
+                            delay = 300
+                            outcomes[i][1] = 'none'
+                        break;
+                        case 'new':
+                            audioClone = new Audio(aud_addSlot.src)
+                            audioClone.play()
+                            delay = 500
+                            outcomes[i][1] = 'none'
+                        break;
+                        case 'clone':
+                            audioClone = new Audio(aud_cloneSlot.src)
+                            audioClone.play()
+                            delay = 300
+                            outcomes[i][1] = 'none'
+                        break;
+                        case 'downgrade':
+                            audioClone = new Audio(aud_downgradeSlot.src)
+                            audioClone.play()
+                            delay = 700
+                            outcomes[i][1] = 'none'
+                        break;
+                        default:
+                            console.log(`Error: default case used in switch on line 356`)
+                            audioClone = new Audio(aud_createSlot.src)
+                            audioClone.play()
+                            delay = 100
+                            outcomes[i][1] = 'none'
+                        break;
+                    }
+
+                    await new Promise(resolve => setTimeout(resolve, delay));
+            }
+
+            lockWheel = false
+        }
+
+        let currentWheelRotation = 0;
+        function spin() {
+            if (lockWheel == true) {
+                //play denid se
+                console.log('x')
+            } else {
+                lockWheel = true
+                aud_wheelStart.play()
+                setTimeout(() => {
+                aud_wheelTick.play()
+
+                const spinner = document.getElementById('wheelSegments')
+
+                const randomDegrees = Math.floor(Math.random() * (1440 - 360 + 1)) + 720;
+
+                spinner.style.setProperty('--stratDeg', `${currentWheelRotation}`);
+
+                spinner.style.setProperty('--endDeg', `${currentWheelRotation + randomDegrees}deg`);
+
+                currentWheelRotation += randomDegrees
+
+                // Restart the animation by toggling it off and on
+                spinner.style.animation = 'none'; // Disable animation temporarily
+                void spinner.offsetWidth; // Trigger reflow (forces the browser to recognize the change)
+                spinner.style.animation = ''; // Reapply the original animation
+
+                
+
+                setTimeout(() => {
+                    aud_wheelEnd.play()
+                    pickedOutcome = null;
+                    winningSegment = 0;
+
+                    checkSelected = document.getElementById('rewardChecker').getBoundingClientRect()
+
+                    document.querySelectorAll('.segment').forEach((segment) => {
+                        checker = segment.children[1].getBoundingClientRect()
+
+                        console.log(segment.children[0].reward, checker.x)
+
+                        if (checker.x > winningSegment) {
+                            winningSegment = checker.x
+                            pickedOutcome = segment.children[0].reward
+                        }
+                    })
+
+                    if (isNumber(pickedOutcome) == false) {
+                        switch(pickedOutcome) {
+                            case 'SAFE':
+                                document.getElementById('result').innerHTML = `Current owed amount: ${moneyOwed}`
+                                document.getElementById('lastRollDisplay').innerHTML = `Last roll: ${pickedOutcome}`
+                            break;
+                            default:
+                                alert('error')
+                            break;
+                        }
+                    } else {
+                        moneyOwed = moneyOwed + parseInt(pickedOutcome)
+                        document.getElementById('result').innerHTML = `Current owed amount: ${moneyOwed}`
+                        document.getElementById('lastRollDisplay').innerHTML = `Last roll: ${pickedOutcome}`
+                    }
+
+                    
+
+                    if (moneyMilestones.length != 0 && moneyOwed >= moneyMilestones[0][0]) {
+                        grantMilestoneReward()
+                    }
+
+                    progresion = progresion + progresionIncrement
+                    document.getElementById('levelProgressionDisplay').value = progresion
+
+                    if (progresion >= 100) {
+                        progresion = 0
+                        document.getElementById('levelProgressionDisplay').value = progresion
+
+
+
+                        level++
+                        buildLevelUpReward()
+                        document.getElementById('levelDisplay').innerHTML = 'Level: ' + level
+
+
+
+                        if (progresionIncrement > 10) {
+                            progresionIncrement = progresionIncrement - 2
+                        }
+                    }
+
+                    lockWheel = false
+                }, 4500)
+
+            }, 100)
+            
+            }
+            
+            
+        }
+
+        function isNumber(value) {
+            return typeof value === 'number'
+        }
+
+        let moneyMilestones = [
+            [25, 'A good start, but not nearly enough.'],
+            [50, 'placeholder text'],
+            [100, 'Triple digits <3'],
+            [250, 'future thing to go here'],
+            [500, 'this is getting really high'],
+            [750, 'The wheel probably looks really messy by now hun?'],
+            [1000, 'You are planning to send all this right?'],
+            [2000, 'last milestone for now'],
+        ]
+
+        function grantMilestoneReward() {
+            aud_milestoneReached.play()
+            document.getElementById('milestonePopUp').style.display = 'block'
+            document.getElementById('milestoneAmountDisplay').innerHTML = '$' + moneyMilestones[0][0]
+            document.getElementById('milestoneText').innerHTML = moneyMilestones[0][1]
+
+            moneyMilestones.splice(0,1)
+        }
+
+
+        let earlyLevelUpRewards = [
+            {
+                name: "Difficulty scaling",
+                description: "-Add three $10 slots to the wheel<br>-Add one $25 slot to the wheel",
+                rewardId: 1
+            },
+            {
+                name: "Higher prices",
+                description: "-Double the value of 3 slots<br>-Add one free slot",
+                rewardId: 2
+            },
+            {
+                name: "Roll the dice",
+                description: "-Each slot has a 50% chance of being destroyed (minimum of 6 slots)<br>-All surviving slots will be multiplied by anywhere from 2 to 5",
+                rewardId: 3
+            },
+            {
+                name: "New heights",
+                description: "-Add one $50 slot",
+                rewardId: 4
+            },
+            {
+                name: "Experimental cloning",
+                description: "-Duplicate 2 random slots",
+                rewardId: 5
+            },
+            {
+                name: "A bit of this, a little of that",
+                description: "-Duplicate a random slot <br>-Add a $10 slot or a $25 slot <br>-Multiply the value of a random slot",
+                rewardId: 6
+            },
+            {
+                name: "A thousand cuts",
+                description: "-Replace the highest value slot with a $5 slot <br>-Add three $5 slots",
+                rewardId: 7
+            },
+            {
+                name: "Stock crash",
+                description: "-Half the value of the highest value slot then duplicate it twice",
+                rewardId: 8
+            },
+            {
+                name: "Stock surge",
+                description: "-Double the value of the lowest value slot then duplicate it three times",
+                rewardId: 9
+            },
+            {
+                name: "Risk and reward",
+                description: "-Add one $100 slot<br>-Add two free slots",
+                rewardId: 10
+            },
+            {
+                name: "Playing with fire",
+                description: "-Add three $100 slots",
+                rewardId: 11
+            },
+        ]
+
+        //buildLevelUpReward() //COMMENT THIS OUT
+        function buildLevelUpReward() {
+            parent = document.getElementById('levelUpRewardSelector')
+
+            parent.querySelectorAll('div').forEach((div) => {
+                div.remove()
+            })
+            
+
+            for (let i = 0; i < 3; i++) {
+                randomNumber = Math.floor(Math.random() * earlyLevelUpRewards.length)
+
+                const choice = document.createElement('div')
+                choice.id = earlyLevelUpRewards[randomNumber].rewardId
+                choice.classList.add('levelUpRewardOption')
+
+                title = document.createElement('h1')
+                title.innerHTML = earlyLevelUpRewards[randomNumber].name
+
+                description = document.createElement('p')
+                description.innerHTML = earlyLevelUpRewards[randomNumber].description
+
+                choice.appendChild(title)
+                choice.appendChild(description)
+
+                choice.addEventListener('click', () => {
+                    modifyWheel(choice.id)
+                })
+                parent.appendChild(choice)
+            }
+
+            parent.style.display = 'flex'
+            aud_levelUp.play()
+        }
+
+        function modifyWheel(id) {
+
+            //id = '11'; //COMMENT THIS OUT
+
+            switch(id) {
+                case '1':
+                    for (let i = 0; i < 3; i++) {
+                        outcomes.push([10, 'new'])
+                    }
+                    outcomes.push([25, 'new'])
+                    buildWheel()
+                break;
+                case '2':
+                    for (let i = 0; i < 3; i++) {
+                        randomNumber = Math.floor(Math.random() * outcomes.length)
+                        if (isNumber(outcomes[randomNumber][0])) {
+                            newValue = outcomes[randomNumber][0] * 2
+                            outcomes.splice(randomNumber, 1, [newValue,'upgrade'])
+                        }
+                    }
+                    outcomes.push(['SAFE', 'new'])
+                    buildWheel()
+                break;
+                case '3':
+                    for (let i = 0; i < outcomes.length; i++) {
+
+                        if (Math.floor(Math.random() * 1) == 0 && outcomes.length > 6) {
+                            outcomes.splice(i, 1)
+                            console.log('xx')
+                        } else {
+                            if (isNumber(outcomes[i][0])) {
+                                randomNumber = Math.floor(Math.random() * 4) + 2
+                                newValue = outcomes[i][0] * randomNumber
+                                outcomes.splice(i, 1, [newValue, 'upgrade'])
+                            }
+                        }
+                        
+                    }
+
+                    outcomes = outcomes.concat(newOutcomes)
+                    buildWheel()
+                break;
+                case '4':
+                    outcomes.push([50,'new'])
+                    buildWheel()
+                break;
+                case '5':
+                    for(let i = 0; i < 2; i++) {
+                        randomNumber = Math.floor(Math.random() * outcomes.length)
+                        temp = outcomes[randomNumber]
+                        temp[1] = 'clone'
+                        
+                        outcomes.push(temp)
+                    }
+                    buildWheel()
+                break;
+                case '6':
+                    randomNumber = Math.floor(Math.random() * outcomes.length)
+                    temp = outcomes[randomNumber]
+                    temp[1] = 'clone'
+                    outcomes.push(temp)
+
+                    if (Math.floor(Math.random() * 2) == 0) {
+                        outcomes.push([25,'new'])
+                    } else {
+                        outcomes.push([10,'new'])
+                    }
+
+                    randomNumber2 = Math.floor(Math.random() * outcomes.length)
+                    if (isNumber(outcomes[randomNumber2][0])) {
+                        newValue = outcomes[randomNumber2][0] * 2
+                        outcomes.splice(randomNumber2, 1, [newValue,'upgrade'])
+                    }
+
+                    buildWheel()
+                break;
+                case '7':
+                    highValue = 0
+                    position = 0
+                    for (let i = 0; i < outcomes.length; i++) {
+
+                        if (isNumber(outcomes[i][0]) && outcomes[i][0] > highValue) {
+                            highValue = outcomes[i][0]
+                            position = i
+                        }
+                        
+                    }
+                    outcomes[position][0] = 5
+                    outcomes[position][1] = 'downgrade'
+
+                    for (let i = 0; i < 3; i++) {
+                        outcomes.push([5, 'new'])
+                    }
+
+                    buildWheel()
+                break;
+                case '8':
+                    highValue = 0
+                    position = 0
+                    for (let i = 0; i < outcomes.length; i++) {
+
+                        if (isNumber(outcomes[i][0]) && outcomes[i][0] > highValue) {
+                            highValue = outcomes[i][0]
+                            position = i
+                        }
+                        
+                    }
+
+                    newValue = Math.round(outcomes[position][0] / 2)
+
+                    outcomes[position][0] = newValue
+                    outcomes[position][1] = 'downgrade'
+
+                    for (let i = 0; i < 2; i++) {
+                        outcomes.push([newValue, 'new'])
+                    }
+
+                    buildWheel()
+                break;
+                case '9':
+                    lowValue = outcomes[0][0]
+                    position = 0
+                    for (let i = 0; i < outcomes.length; i++) {
+
+                        if (isNumber(outcomes[i][0]) && outcomes[i][0] < lowValue) {
+                            lowValue = outcomes[i][0]
+                            position = i
+                        }
+                        
+                    }
+
+                    newValue = Math.round(outcomes[position][0] * 2)
+
+                    outcomes[position][0] = newValue
+                    outcomes[position][1] = 'downgrade'
+
+                    for (let i = 0; i < 3; i++) {
+                        outcomes.push([newValue, 'new'])
+                    }
+
+                    buildWheel()
+                break;
+                case '10':
+                    outcomes.push([100, 'new'])
+                    outcomes.push(['SAFE', 'new'])
+                    outcomes.push(['SAFE', 'new'])
+                    buildWheel()
+                break;
+                case '11':
+                    for (let i = 0; i < 3; i++) {
+                        outcomes.push([100, 'new'])
+                    }
+                    buildWheel()
+                break;
+                default:
+                    console.log('Corrosive suck at game dev')
+            }
+
+            //console.log(outcomes)
+
+            document.getElementById('levelUpRewardSelector').style.display = 'none'
+        }
+    </script>
+</body>
+</html>
