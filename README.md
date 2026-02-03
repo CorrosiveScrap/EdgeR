@@ -28,13 +28,14 @@ EdgR is fetishware that continuously spammes the user with image, video, and aud
 
 
 # Downloads
-> - [v1.1.1 - zip]()
+> - [Blockmap Setup](https://github.com/CorrosiveScrap/EdgeR/releases/download/V1.1.1/EdgR.1.1.Setup.zip) (Recomended)
 
-> - [v0.9.5 - zip]()
+> - [Unpacked](https://github.com/CorrosiveScrap/EdgeR/releases/download/V1.1.1/EdgR.1.1.Unpacked.zip)
 
 
 # Editing
 EdgR is under the [MIT licence](https://github.com/CorrosiveScrap/EdgeR/blob/main/LICENSE) therefor you have the ability to copy, modify, merge, publish, or distribute copies of EdgR however you wish. This also means that EdgR is given to you without any kind of warranty and I am not responsible for damages or other liability.
+
 
 
 - **This is not required but if you are publishing modified copied of edgR it would be a cool move if you credited me ;)**
