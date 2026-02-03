@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+            user-select: none;
+            background: black;
+        }
+        img {
+            display: block;
+        }
+
+        button {
+            all: unset;
+            color: white;
+            border: 1px solid white;
+            background: black;
+            text-align: center;
+            padding: 5px;
+            width: 50px;
+            position: absolute !important;
+            left: 100%;
+            top: 100% !important;
+            translate: -110% -115%;
+            border-radius: 10%;
+            cursor: pointer;
+        }
+
+        #overlay {
+            position: absolute;
+            height: 100vh;
+            width: 100vw;
+            top: 0px;
+            left: 0px;
+            backdrop-filter: blur(0px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #textOverlay {
+            width: fit-content;
+            color: white;
+            z-index: 100;
+            text-align: center;
+            text-shadow: 0px 0px 10px black;
+
+            animation: strobeText 1s linear infinite;
+        }
+
+        @keyframes strobeText {
+
+            0% {
+                color: red;
+            }
+
+            25% {
+                color: rgb(0, 255, 0);
+            }
+
+            50% {
+                color: yellow;
+            }
+
+            75% {
+                color: rgb(59, 147, 255);
+            }
+
+            100% {
+                color: red;
+            }
+            
+        }
+
+        button {
+            position: absolute;
+            top: 90%;
+        }
+
+        #warning {
+            font-size: medium;
+            background: black;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            translate: -50% -50%;
+            height: 40%;
+            width: 80%;
+            color: red;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="warning">
+        <h1>No media found - audio</h1>
+        <p>This usually happens if you have no folders connected in <u>settings > files</u> or that path is no longer correct</p>
+        <button onclick="window.close()">Close</button>
+    </div>
+    <audio src="" id="audDisplay" autoplay></audio>
+    <div id="overlay">
+        <p id="textOverlay"></p>
+    </div>
+    <script>
+        const showType = localStorage.getItem('er_setting_audioMedia')
+        
+        let videos
+        pimage = document.createElement('img')
+        pvideo = document.createElement('video')
+        let winner;
+
+        switch (showType) {
+            case 'img':
+                winner = pimage;
+                pimage.id = 'display'
+                document.body.appendChild(pimage)
+                videos = JSON.parse(localStorage.getItem('images'))
+            break;
+            case 'vid':
+                winner = pvideo;
+                pvideo.id = 'display'
+                pvideo.autoplay = true
+                pvideo.loop = true
+                pvideo.muted = true
+                document.body.appendChild(pvideo)
+                videos = JSON.parse(localStorage.getItem('videos'))
+            break;
+        }
+
+        const audio = JSON.parse(localStorage.getItem('audio'))
+        const audioIndex = Math.floor(Math.random() * audio.length)
+        document.getElementById('audDisplay').src = audio[audioIndex][Math.floor(Math.random() * audio[audioIndex].length)]
+
+        if (localStorage.getItem('er_setting_audioEnd') == 'loop') {
+            document.getElementById('audDisplay').loop = true
+        } else {
+            document.getElementById('audDisplay').addEventListener("ended", () => {
+                window.close()
+            })
+        }
+
+        if (audio === "" || audio === null || audio.length === 0) {
+            window.resizeTo(500, 500)
+            document.getElementById('warning').style.display = 'block'
+        }
+
+        const img = winner
+        console.log(img)
+        
+        const imageIndex = Math.floor(Math.random() * videos.length)
+        img.src = videos[imageIndex][Math.floor(Math.random() * videos[imageIndex].length)]
+
+
+        let maxSize = 300;
+        let minSize = 200;
+
+        if (localStorage.getItem('er_setting_maxSize')) {
+            maxSize = parseInt(localStorage.getItem('er_setting_maxSize'))
+        }
+        if (localStorage.getItem('er_setting_minSize')) {
+            minSize = parseInt(localStorage.getItem('er_setting_minSize'))
+        }
+
+        img.addEventListener("loadedmetadata", () => {
+            doshit()
+        })
+
+        img.addEventListener("load", () => {
+            doshit()
+        })
+
+        function doshit() {
+            console.log('load')
+            const randomNumber = Math.floor(Math.random() * maxSize) + minSize
+            img.style.height = randomNumber + 'px'
+            const imgBound = img.getBoundingClientRect()
+            console.log(imgBound)
+            window.resizeTo(imgBound.width, imgBound.height)
+
+
+            switch(localStorage.getItem('er_setting_popupType')) {
+                case "edges":
+                    const randomEdge = Math.floor(Math.random() * 4)
+                    switch (randomEdge) {
+                        case 0: //top
+                            window.moveTo(Math.floor(Math.random() * window.screen.width - imgBound.width), 0)
+                        break;
+                        case 1: // left
+                            window.moveTo(0, Math.floor(Math.random() * window.screen.height - imgBound.height))
+                        break;
+                        case 2: // bottom
+                            window.moveTo(Math.floor(Math.random() * window.screen.width - imgBound.width), window.screen.height - imgBound.height)
+                        break;
+                        case 3: // right
+                            window.moveTo(window.screen.width - imgBound.width, Math.floor(Math.random() * window.screen.height - imgBound.height))
+                        break;
+                    }
+                break;
+                case "corners":
+                    const random4 = Math.floor(Math.random() * 4)
+                    switch (random4) {
+                        case 0: //top left
+                            window.moveTo(0, 0)
+                        break;
+                        case 1: // top right
+                            window.moveTo(window.screen.width - imgBound.width, 0)
+                        break;
+                        case 2: // bottom left
+                            window.moveTo(0, window.screen.height - imgBound.height)
+                        break;
+                        case 3: // bottom right
+                            window.moveTo(window.screen.width - imgBound.width, window.screen.height - imgBound.height)
+                        break;
+                    }
+                break;
+                case "random":
+                default:
+                    const randomX = Math.floor(Math.random() * (window.screen.width - imgBound.width))
+                    const randomY = Math.floor(Math.random() * (window.screen.height - imgBound.height))
+
+                    window.moveTo(randomX, randomY)
+
+                    console.log(`Window moved\nX axis: ${randomX}\nY axis: ${randomY}`)
+                break;
+            }
+
+            if (localStorage.getItem('er_setting_bounce') === 'true') {
+                const speed = 2
+                let currentX = window.screenX
+                let currentY = window.screenY
+
+                const boundX = screen.availWidth - imgBound.width
+                const boundY = screen.availHeight - imgBound.height
+
+                let velocityX = speed
+                let velocityY = -speed
+
+                console.log(currentX, currentY, boundX, boundY)
+
+                setInterval(() => {
+                    if (currentX >= boundX) {
+                        velocityX = -speed
+                    }
+
+                    if (currentX <= 0) {
+                        velocityX = speed
+                    }
+
+                    if (currentY >= boundY) {
+                        velocityY = -speed
+                    }
+
+                    if (currentY <= 0) {
+                        velocityY = speed
+                    }
+
+                    currentX += velocityX
+                    currentY += velocityY
+
+                    window.moveTo(currentX, currentY)
+                }, 10)
+            }
+            
+            const textOverlay = document.getElementById('textOverlay')
+
+            let fontSize = 1;
+            let guard = 1;
+            const gap = 30;
+
+            while (textOverlay.getBoundingClientRect().width <= imgBound.width && guard < 250) {
+                fontSize++;
+                guard++
+                textOverlay.style.fontSize = fontSize + 'px';
+            }
+
+            fontSize = fontSize - gap;
+            textOverlay.style.fontSize = fontSize + 'px';
+            textOverlay.style.width = "100%"
+
+            console.log(`Finished text sizing!\nEnd size: ${fontSize}\nNumber of loops: ${guard}\nGap value of: ${gap}`)
+        }
+
+
+
+
+        
+        const rng = Math.floor(Math.random() * 100)
+        console.log('Window rng: ' + rng)
+
+        //Captions
+        //////////////////////////////////////////////////////////
+        let comments
+        if (localStorage.getItem('captionList')) {
+            comments = JSON.parse(localStorage.getItem('captionList'))
+        } else {
+            comments = ['No captions added']
+        }
+        
+        if (localStorage.getItem('er_setting_addCaption') && parseInt(localStorage.getItem('er_setting_addCaption')) > rng) {
+            document.getElementById('textOverlay').innerHTML = comments[Math.floor(Math.random() * comments.length)]
+        }
+        //////////////////////////////////////////////////////////
+        
+
+        //Overlay
+        //////////////////////////////////////////////////////////
+        if (localStorage.getItem('er_setting_addoverlay') && parseInt(localStorage.getItem('er_setting_addoverlay')) > rng) {
+            const blurAmount = parseInt(localStorage.getItem('er_setting_overlayOpacity')) / 10
+            document.getElementById('overlay').style.backdropFilter = `blur(${blurAmount}px)`
+        }
+
+        if (localStorage.getItem('er_setting_captionOpacity')) {
+            document.getElementById('textOverlay').style.opacity = parseInt(localStorage.getItem('er_setting_captionOpacity')) + "%"
+        }
+        //////////////////////////////////////////////////////////
+
+
+        //Close button
+        //////////////////////////////////////////////////////////
+        if (localStorage.getItem('er_setting_addColseButton') && parseInt(localStorage.getItem('er_setting_addColseButton')) > rng) {
+            const button = document.createElement('button')
+
+            if (localStorage.getItem('er_setting_closeButtonText')) {
+                button.innerHTML = localStorage.getItem('er_setting_closeButtonText')
+            } else {button.innerHTML = 'close'}
+            
+            button.addEventListener('click', () => {window.close()})
+            document.body.appendChild(button)
+        }
+        //////////////////////////////////////////////////////////
+
+
+        //window.resizeTo(500, 500)
+    </script>
+</body>
+</html>

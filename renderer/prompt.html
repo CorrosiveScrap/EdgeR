@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+            user-select: none;
+            color: white;
+        }
+        img {
+            display: block;
+        }
+
+        #promptContainer {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            height: 100vh;
+            width: 100vw;
+            z-index: 10;
+            backdrop-filter: blur(2px);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #inputt {
+            background: black;
+            border: 1px solid white;
+            color: white;
+            resize: none;
+            width: 100%;
+            height: 7vh;
+            position: absolute;
+            top: 93vh;
+            overflow-y: hidden;
+            font-size: 5vh;
+        }
+
+        #log {
+            height: 80vh;
+            width: 100%;
+            font-size: 3vh;
+            overflow-y: scroll;
+        }
+
+        #log::-webkit-scrollbar {
+            display: none;
+        }
+
+        #log b {
+            background: red;
+        }
+
+        #log i {
+            background: green;
+        }
+    </style>
+</head>
+<body>
+    <div id="promptContainer">
+        <h1 align="center" style="margin: 0px; color: white; text-shadow: 0px 0px 10px black;" id="lineDis"></h1>
+        <h2 align="center" style="margin: 5px;" id="lineReqDis"></h2>
+        <hr style="margin: 0;">
+        <div id="log"></div>
+        <textarea id="inputt" rows="1"></textarea>
+    </div>
+    <img src="" id="display" alt="">
+
+    <script>
+        let lines;
+
+        if (localStorage.getItem("er_promptList")) {
+            lines = JSON.parse(localStorage.getItem('er_promptList'))
+        } else {
+            lines = [
+                'these',
+                'are',
+                'placeholders'
+            ]
+        }
+        
+        const log = document.getElementById('log')
+        const line = lines[Math.floor(Math.random() * lines.length)]
+        const lineDisplay = document.getElementById('lineDis')
+        let amount = 3
+        if(localStorage.getItem('er_requiredCorrectPromptInputs')) {
+            amount = parseInt(localStorage.getItem('er_requiredCorrectPromptInputs'))
+        }
+        const amountDisplay = document.getElementById('lineReqDis')
+        let failAmount = 2
+        if(localStorage.getItem('er_promptGainAmount')) {
+            failAmount = parseInt(localStorage.getItem('er_promptGainAmount'))
+        }
+
+        function updateStats() {
+            lineDisplay.innerHTML = line
+            amountDisplay.innerHTML = `Lines required: ${amount}`
+        }
+
+        updateStats()
+
+        let istyping = false
+        let currentLine = ''
+        let currentNumber = 0
+        document.getElementById('inputt').addEventListener('focus', () => {
+            istyping = true
+        })
+
+        document.getElementById('inputt').addEventListener('blur', () => {
+            istyping = false
+        })
+
+        let clearOnUp = false;
+        document.addEventListener('keydown', (e) => {
+            if (istyping == true) {
+                if (e.key == 'Shift' || e.key == 'CapsLock' || e.key == 'Enter') {
+                    return;
+                }
+
+                console.log(document.getElementById('inputt').value)
+
+                const correctLetter = line.slice(currentNumber, currentNumber+1)
+                console.log(e.key, correctLetter, line)
+
+                if (e.key != correctLetter) {
+                    log.innerHTML += `<br> ${line.slice(0, currentNumber)} <b>${e.key}</b>`
+                    scrollLog()
+                    clearOnUp = true;
+                    amount += failAmount
+                    currentNumber = 0
+                    updateStats()
+                } else {
+                    currentNumber++
+                }
+            }
+        })
+
+        document.addEventListener('keyup', (e) => {
+            if (clearOnUp === true) {
+                document.getElementById('inputt').value = ''
+                clearOnUp = false
+                return
+            }
+            
+            if (line === document.getElementById('inputt').value) {
+                console.log('win')
+                document.getElementById('inputt').value = ''
+                log.innerHTML += `<br><i>${line}</i>`
+                scrollLog()
+                amount--
+                if (amount === 0) {
+                    window.close()
+                }
+                currentNumber = 0
+                updateStats()
+            }
+            
+        })
+
+        function scrollLog() {
+            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight
+        }
+
+
+        const images = JSON.parse(localStorage.getItem('images'))
+
+        if (images === "" || images === null || images.length === 0) {
+            window.resizeTo(500, 500)
+            document.getElementById('warning').style.display = 'block'
+        }
+
+        const img = document.getElementById('display')
+        const imageIndex = Math.floor(Math.random() * images.length)
+        img.src = images[imageIndex][Math.floor(Math.random() * images[imageIndex].length)]
+
+        let maxSize = 300;
+        let minSize = 600;
+
+        // if (localStorage.getItem('er_setting_maxSize')) {
+        //     maxSize = parseInt(localStorage.getItem('er_setting_maxSize'))
+        // }
+        // if (localStorage.getItem('er_setting_minSize')) {
+        //     minSize = parseInt(localStorage.getItem('er_setting_minSize'))
+        // }
+
+        img.addEventListener("load", () => {
+            const randomNumber = Math.floor(Math.random() * maxSize) + minSize
+            img.style.height = randomNumber + 'px'
+            const imgBound = img.getBoundingClientRect()
+            window.resizeTo(imgBound.width, imgBound.height)
+
+            switch(localStorage.getItem('er_setting_popupType')) {
+                case "edges":
+                    const randomEdge = Math.floor(Math.random() * 4)
+                    switch (randomEdge) {
+                        case 0: //top
+                            window.moveTo(Math.floor(Math.random() * window.screen.width - imgBound.width), 0)
+                        break;
+                        case 1: // left
+                            window.moveTo(0, Math.floor(Math.random() * window.screen.height - imgBound.height))
+                        break;
+                        case 2: // bottom
+                            window.moveTo(Math.floor(Math.random() * window.screen.width - imgBound.width), window.screen.height - imgBound.height)
+                        break;
+                        case 3: // right
+                            window.moveTo(window.screen.width - imgBound.width, Math.floor(Math.random() * window.screen.height - imgBound.height))
+                        break;
+                    }
+                break;
+                case "corners":
+                    const random4 = Math.floor(Math.random() * 4)
+                    switch (random4) {
+                        case 0: //top left
+                            window.moveTo(0, 0)
+                        break;
+                        case 1: // top right
+                            window.moveTo(window.screen.width - imgBound.width, 0)
+                        break;
+                        case 2: // bottom left
+                            window.moveTo(0, window.screen.height - imgBound.height)
+                        break;
+                        case 3: // bottom right
+                            window.moveTo(window.screen.width - imgBound.width, window.screen.height - imgBound.height)
+                        break;
+                    }
+                break;
+                case "random":
+                default:
+                    const randomX = Math.floor(Math.random() * (window.screen.width - imgBound.width))
+                    const randomY = Math.floor(Math.random() * (window.screen.height - imgBound.height))
+
+                    //window.moveTo(randomX, randomY)
+                    window.moveTo(1200, 50)
+
+                    console.log(`Window moved\nX axis: ${randomX}\nY axis: ${randomY}`)
+                break;
+            }
+        })
+    </script>
+</body>
+</html>

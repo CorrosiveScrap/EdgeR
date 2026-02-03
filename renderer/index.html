@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css" type="text/css">
+</head>
+<body>
+    <div id="bodyTint"></div>
+    <div id="menu">
+        <h1>EdgR</h1>
+
+        <button>START</button>
+        <button>SETTINGS</button>
+        <button>EXTRA</button>
+        <button style="border: 1px solid gold;">FULL VERSION</button>
+        <button>EXIT</button>
+        <p> &copy; Corrosive Scrap</p>
+    </div>
+
+
+    <div id="settings">
+        <div id="settingsFlex">
+            <h1>Settings</h1>
+
+            <div id="catagoryHolder">
+                <button>Popups</button>
+                <button>Interval</button>
+                <button>Placement</button>
+                <button>Overlays</button>
+                <button>Captions</button>
+                <button>Files</button>
+                <button>Prompts</button>
+                <button>Discord</button>
+                <button>Hotkeys</button>
+                <button>Client</button>
+                <button>Debug</button>
+            </div>
+
+            <div id="settingHolder">
+                <div id="popups" class="settingPage">
+                    <div id="firstPopupSettingBlock">
+                        <div class="firstBlockCol" style="flex-basis: 30%;">
+                            <h2>Chance &nbsp; </h2>
+                            <p><span id="imageChanceText">Create Image 50%</span> <br> <input id="createImageChance" type="range" value="50" max="100" min="0"></p>
+                            <p><span id="videoChanceText">Create Video 50%</span> <br> <input id="createVideoChance" type="range" value="50" max="100" min="0"></p>
+                            <p><span id="audioChanceText">Create Audio 50% </span> <br> <input id="createAudioChance" type="range" value="50" max="100" min="0"></p>
+                            <p><span id="promtpChanceText">Create Prompt 50%</span> <br> <input id="createPromptChance" type="range" value="50" max="100" min="0"></p>
+                            <p><span id="notificationChanceText">Create Notification 50%</span> <br> <input id="createNotificationChance" type="range" value="50" max="100" min="0"></p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 30%;">
+                            <h2>Amount &nbsp; </h2>
+                            <p><span id="imageAountText">Images 1</span> <br> <input id="imageAmountValue" type="range" value="1" max="10" min="1"></p>
+                            <p><span id="videoAmountText">Videos 1</span> <br> <input id="videoAmountValue" type="range" value="1" max="10" min="1"></p>
+                            <p><span id="audioAmountText">Audio 1</span> <br> <input id="audioAmountValue" type="range" value="1" max="10" min="1"></p>
+                            <p><span id="promptAmountText">Prompts 1</span> <br> <input id="promptAmountValue" type="range" value="1" max="10" min="1"></p>
+                            <p><span id="notificationAmountText">Notifications 1</span> <br> <input id="notificationAmountValue" type="range" value="1" max="10" min="1"></p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 25%;">
+                            <h2>Popup fade &nbsp; </h2>
+                            <p title=""><input type="checkbox" id="setting_fade" checked> Fade</p>
+                            <p id="currentFadeTimeDisplay">Current fade time: 5s</p>
+                            <p><input type="number" placeholder="5" id="setting_fadeTime"> <button id="changeFadeTime">Change</button></p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 25%;">
+                            <h2>Video end &nbsp; </h2>
+                            <p title="Restart the chosen video from the beginning"><input type="radio" name="vidEnd" value="loop" checked> Loop</p>
+                            <!--<p title="Play a different video listed in files"><input type="radio"> Change</p>-->
+                            <p title="Close the popup automatically regardless of fade time"><input type="radio" name="vidEnd" value="close"> Close</p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 25%;">
+                            <h2>Audio end &nbsp; </h2>
+                            <p title="Restart the chosen video from the beginning"><input type="radio" name="audEnd" value="loop" checked> Loop</p>
+                            <!--<p title="Play a different video listed in files"><input type="radio"> Change</p>-->
+                            <p title="Close the popup automatically regardless of fade time"><input type="radio" name="audEnd" value="close"> Close</p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 35%;">
+                            <h2>Audio display &nbsp; </h2>
+                            <!--
+                            <p title=""><input type="checkbox"> Hide audio window</p>
+                            -->
+                            <p title=""><input type="checkbox" id="limitAudio" checked> Limit to one</p>
+                            <p title=""><input type="radio" name="audMedia" value="img" checked> Show image</p>
+                            <p title=""><input type="radio" name="audMedia" value="vid"> Show video</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="interval" class="settingPage">
+                    <div id="firstPopupSettingBlock">
+                        <div class="firstBlockCol" style="flex-basis: 90%;">
+                            <h2>Downtime&nbsp; </h2>
+                            <p title=""><input type="checkbox" id="setting_randomDowntimeToggle"> Randomize downtime</p>
+                            <p id="setting_currentDowntimeDisplay">Current downtime: 5s</p>
+                            <input type="number" placeholder="3" id="setting_randomDownTime">
+
+                            <div style="all: unset; display: none;" id="setting_secondDowntimeNumberVis">
+                                to
+                                <input type="number" placeholder="5" id="setting_randomDownTimeMax">
+                            </div>
+                            
+                            <button id="saveRandomDownTime">Change</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="placement" class="settingPage">
+                    <div id="firstPopupSettingBlock">
+                        <div class="firstBlockCol" style="flex-basis: 20%;">
+                            <h2>Type&nbsp; </h2>
+                            <p><input type="radio" name="popupType" value="random" checked> Random</p>
+                            <p><input type="radio" name="popupType" value="edges"> Edges</p>
+                            <p><input type="radio" name="popupType" value="corners"> Corners</p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 20%;">
+                            <h2>Size&nbsp; </h2>
+                            <p><span id="popupMaxSizeText">Max size: 500</span><br> <input id="popupMaxSizePercent" type="range" max="1000" min="0"></p>
+                            <p><span id="popupMinSizeText">Min size: 100</span><br> <input id="popupMinSizePercent" type="range" max="1000" min="0"></p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 20%;">
+                            <h2>attributes&nbsp; </h2>
+                            <p><input type="checkbox" id="bounceCheck"> Bounce</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="overlays" class="settingPage">
+                    <div id="firstPopupSettingBlock">
+                        <div class="firstBlockCol" style="flex-basis: 25%;">
+                            <h2>Chance &nbsp; </h2>
+                            <p><span id="addOverlayText">Add overlay 100%</span> <br> <input id="addOverlayPercent" type="range" max="100" min="0" value="100"></p>
+                            <p><span id="addCaptionText">Add caption 50%</span> <br> <input id="addCaptionPercent" type="range" max="100" min="0"></p>
+                            <p><span id="addCloseButtonText">Add close button 50%</span> <br> <input id="addCloseButtonPercent" type="range" max="100" min="0"></p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 30%;">
+                            <h2>Opcatiy &nbsp; </h2>
+                            <p><span id="overlayOpacityText">Overlay opacity 100%</span> <br> <input id="overlayOpacityPercent" type="range" max="100" min="0" value="100"></p>
+                            <p><span id="captionOpcatityText">Caption opacity 100%</span> <br> <input id="captionOpacityPercent" type="range" max="100" min="0" value="100"></p>
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 20%;">
+                            <!--
+                            <h2>Overlay&nbsp; </h2>
+                            
+                            <p title=""><input type="radio"> Spirals</p>
+                            <p title=""><input type="radio"> Blur</p>
+                            -->
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 30%;">
+                            <h2>Close button&nbsp; </h2>
+
+                            <!--
+                            <p title=""><input type="radio"> Close</p>
+                            <p title=""><input type="radio"> Open more</p>
+                            -->
+                            <p>Button text<input type="text" placeholder="Close" id="chanegCloseButtonText"></p>
+                            
+                        </div>
+
+                        <div class="firstBlockCol" style="flex-basis: 50%;">
+                        </div>
+
+                        
+
+                        
+                    </div>
+                </div>
+
+                <div id="captions" class="settingPage">
+                    <div id="captionAddBlock">
+                        <textarea id="setting_newCaption" cols="2" placeholder="This is a caption!"  style="width: 400px;"></textarea>
+                        <!--<input id="setting_newCaption" type="text" placeholder="This is a caption!" style="width: 400px;">-->
+                        <button id="setting_addCaption">Add</button>
+                    </div>
+                    <div id="captionHolder">
+                        <p>This is a placeholder caption <button>X</button></p>
+                    </div>
+                </div>
+
+                <div id="files" class="settingPage">
+                    <span>
+                        <div id="pathConfigContainer">
+                            <select name="" id="pathConfigSelector">
+                                <option value="images">Images</option>
+                                <option value="videos">Videos</option>
+                                <option value="audio">Audio</option>
+                            </select>
+                            <button id="addNewPath">+ Add new</button>
+                            <button id="removeAllPaths">- Remove all</button>
+                        </div>
+
+                        <div id="pathsDisplay">
+                        </div>
+                    </span>
+                </div>
+
+                <div id="prompts" class="settingPage">
+                    <div style="padding: 10px;">
+                        <div id="numofinputs">Number of correct inputs required: 3</div>
+                        <input type="number" placeholder="3" value="3" id="correctPromptNum"> <button id="changeCorrentInputs">Change</button>
+                        <br><br>
+                        Amount gained on mistake: <br>
+                        <input type="range" min="1" max="10" value="2" id="promptGain"> <span id="gainAmountDis">2</span>
+                        <br><br>
+                        <input type="text" id="promptToadd" placeholder="prompt"> <button id="addPrompt">Add</button> <button id="clearprompts">Clear List</button> <br>
+                        <div style="height: 200px; overflow-y: scroll; background: black; color: white; padding: 5px;" id="promptDisplay"></div>
+                    </div>
+                </div>
+
+                <div id="discord" class="settingPage">
+                    <p>Custom discord activity status will be added in the future</p>
+                    <p>(I'm lazy and this shits a pain in the ass)</p>
+                </div>
+
+                <div id="hotkeys" class="settingPage">
+                    <h2>As of v1.0 EdgR supports global hotkey shortcuts</h2>
+                    <h3>Freeze popup spawns: Ctrl + Shift + f</h3>
+                    <h3>Resume: Ctrl + Shift + r</h3>
+                    <h3>Destroy all popups: Ctrl + Shift + c</h3>
+                    <h3>Shutdown the application: Ctrl + Shift + q</h3>
+                </div>
+
+                <div id="client" class="settingPage" style="padding: 10px;">
+                    <h2>Current version - EdgR 1.1 | Overhaul // patched</h2>
+                    <p>Mute music: <input type="checkbox" id="muteMusic"> &nbsp; Disable stars: <input type="checkbox" id="killStars"></p>
+                    <!--<p>Mute sound: <input type="checkbox"></p> -->
+                    <!--
+                    <p>Timers use miliseconds: <input type="checkbox"></p>
+                -->
+                </div>
+
+                <div id="debug" class="settingPage">
+                    <button id="dbg4">Test popup</button>
+                    <select name="" id="">
+                        <option value="">all</option>
+                    </select>
+                    <br><br>
+                    <button id="dbg1">Show saved image paths</button>
+                    <button id="dbg2">Show saved video paths</button>
+                    <button id="dbg3">Show saved audio paths</button>
+                    <p id="res">...</p>
+                </div>
+            </div>
+
+            <div class="backToMenuModal">
+                <button class="menuButton">MENU</button>
+                <button id="saveSettingsButton">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="extra">
+        <center>
+            <h1 id="">EXTRA</h1>
+            <button onclick="window.open('versions.html', '_blank')">Versions info</button> <br> <br>
+                <button onclick="window.open('https://x.com/CorrosiveScrap', '_blank')">Update sneak peaks</button> <br>
+            <div class="backToMenuModal">
+                <button class="menuButton">MENU</button>
+            </div>
+        </center>
+    </div>
+
+    <div id="fullVersion">
+        <div id="fvContainer">
+            <h1>COMMERCIAL <br> VERSIONS</h1>
+            <!--
+            <h2>Unfettered creativity</h2>
+            -->
+
+            <div class="fvBrick">
+                <h3>About</h3>
+                <p class="borderPurple">
+                    Break free from the shackles of bloat that are attached 
+                    to all these Edgeware-like programs with a custom commercial build. 
+                    Unleash your creativity and paint your unique style in every corner of the app, 
+                    not just the content inside. Elevate your brand and stand out against the crowd.
+                </p>
+            </div>
+
+            <div class="fvBrick">
+                <h3>What we offer</h3>
+                <div class="optionFlexContainer">
+                    <div class="flexOption">
+                        <p class="borderPink">Custom branding</p>
+                        <p class="borderPink">
+                            We will do a professional redesign of all cosmetic features from the ground up 
+                            to match with your unique style. 
+                        </p>
+                    </div>
+
+                    <div class="flexOption">
+                        <p class="borderCyan">Exclusion</p>
+                        <p class="borderCyan">
+                            Pick and choose what you want included. Axe the ability to add files, 
+                            chuck out custom captions, remove close buttons you control what does 
+                            and doesn't end up in the final cut.
+                        </p>
+                    </div>
+
+                    <div class="flexOption">
+                        <p class="borderBlue">Unlimited copies</p>
+                        <p class="borderBlue">
+                            There is no limit on how many people that can use your build. 
+                            Be it 10, 100, or even 5000 users you will never hit a cap on 
+                            how many instances you can ship out.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fvBrick">
+                <h3>Who's in control?</h3>
+                <p class="borderPurple">
+                    Once your are happy with the product you will receive a 
+                    compiled build along with the source code. You are free to change or 
+                    modify the project in any way after that.
+                </p>
+            </div>
+
+            <div class="fvBrick">
+                <h3>Technical support</h3>
+                <p class="borderBlue">
+                    If something is broken or not preforming up to standard swift and reliable support is 
+                    just a message away. Doesn't matter how long its been since the purchase date we will 
+                    always get an issue fixed.
+                </p>
+            </div>
+
+            <div class="fvBrick">
+                <h3>Pricing</h3>
+                <p class="borderCyan">
+                    The average cost for a great looking custom build usually ends up being around 
+                    $20 - $50 USD. It can be as low as $5 if all you need is a couple disabled features 
+                    or reach up to $100+ to create something truly spectacular. Reach out to me on 
+                    <a href="https://x.com/CorrosiveScrap">Twitter ↗</a> if youre interested. Even if you dont know what you want 
+                    exactly im happy to work with you so we can create somehting amazing together <b style="color: red;">♡</b>
+                </p>
+            </div>
+
+            <div class="backToMenuModal">
+                <button class="menuButton">MENU</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

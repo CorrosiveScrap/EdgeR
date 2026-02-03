@@ -1,0 +1,588 @@
+@font-face {
+    font-family: tangerine;
+    src: url(fonts/Tangerine-Regular.ttf);
+}
+
+@font-face {
+    font-family: quintessential;
+    src: url(fonts/Quintessential-Regular.ttf);
+}
+
+body {
+    background-color: black;
+    background: url('img/indexBackground.png');
+    color: white;
+    overflow: hidden;
+    height: 100%;
+    margin: 0%;
+    user-select: none;
+}
+
+#bodyTint {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background: linear-gradient(rgb(0, 0, 0, 0.3), rgb(0, 0, 0, 0.6));
+}
+
+#menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: center;
+    align-items: center;
+}
+
+#menu h1 {
+    font-family: quintessential;
+    letter-spacing: 7px;
+    font-style: italic;
+    font-size: 70px;
+    margin: 5px 0;
+    color: rgb(255, 255, 219);
+    text-shadow: 0px 0px 20px white;
+    -webkit-text-stroke: 0.1px rgb(255, 255, 255);
+}
+
+#menu button {
+    position: relative;
+    cursor: pointer;
+    width: 250px;
+    height: 75px;
+    margin: 15px;
+
+    font-size: 30px;
+    color: white;
+    font-family: quintessential;
+    letter-spacing: 2px;
+    border: 1px solid white;
+    border-radius: 5px;
+
+    background: linear-gradient(to bottom right, rgba(135, 0, 135, 1), rgba(0, 0, 0, 1));
+
+    transition: width 0.2s ease-in, height 0.2s ease-in;
+}
+
+#menu button:hover {
+    width: 290px;
+    height: 80px;
+
+    border: 2px solid white;
+    box-shadow: 0px 0px 10px white;
+    text-shadow: 0px 0px 20px white;
+    transition: width 0.2s ease-out, height 0.2s ease-out;
+}
+
+@property --menuButtonBorderAngle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes menuButtonBorderSpin {
+    0% {
+        --menuButtonBorderAngle: 0deg
+    }
+    100% {
+        --menuButtonBorderAngle: 360deg
+    }
+}
+
+#menu button::after {
+    position: absolute;
+    content: '';
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    padding: 3px;
+    filter: blur(5px);
+
+    background: conic-gradient(from var(--menuButtonBorderAngle), white, transparent, white, transparent, white);
+    animation: menuButtonBorderSpin 10s linear infinite;
+    z-index: -1;    
+    padding: 5px;
+}
+
+#menu p {
+    font-family: tangerine;
+    font-style: italic;
+    margin: 10px;
+    font-size: 40px;
+    background: linear-gradient(to right, rgb(96, 255, 82), rgb(0, 255, 0));
+    background-clip: text;
+    color: rgba(255, 0, 0, 0);
+}
+
+.shootingStar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: fit-content;
+    width: fit-content;
+    vertical-align: middle;
+    font-size: 100px;
+    color: rgba(255, 255, 255, 0);
+    background: yellow;
+    text-shadow: 0px 0px 50px yellow;
+    background-clip: text;
+
+    animation: starRotate 5s linear infinite;
+}
+
+@keyframes starRotate {
+    0% {
+        transform: rotate(0deg);
+    }100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+#settingsFlex {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 0%;
+    width: 100%;
+    height: 100vh;
+}
+
+#settingsFlex h1{
+    flex-basis: 10%;
+    font-size: 50px;
+    font-family: quintessential;
+    letter-spacing: 3px;
+    margin: 0%;
+    text-align: center;
+}
+
+#catagoryHolder{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: rgba(0, 0, 0, 0.238);
+    border: 1px solid white;
+    width: 100%;
+    position: relative;
+}
+
+#catagoryHolder::-webkit-scrollbar {
+    display: none;
+}
+
+#catagoryHolder button {
+    display: inline-block;
+    padding: 0 22px;
+    height: 40px;
+    font-size: 16px;
+    line-height: 40px;
+    border-radius: 25px;
+    background-color: #000000;
+    border: 2px solid white;
+    color: white;
+    margin: 5px 5px;
+    cursor: pointer;
+}
+
+#catagoryHolder button:hover {
+    background-color: rgb(57, 0, 57);
+}
+
+.selectedCatagotyButton {
+    background-color: purple !important;
+}
+
+/*
+#catagoryHolder::after {
+    content: '';
+    background: green;
+    position: absolute;
+    height: 70%;
+    width: 60px;
+    top: 0px;
+    left: 0px;
+    translate: 0px 20%;
+    clip-path: polygon(40% 0%, 40% 20%, 100% 20%, 100% 80%, 40% 80%, 40% 100%, 0% 50%);
+    /*
+    clip-path: polygon(0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%);
+
+}
+*/
+
+/*All the following id's are found in settingHolder*/
+#settingHolder{
+    flex: 0 0 70%;
+    overflow: hidden;
+}
+
+.settingPage {
+    height: 100%;
+}
+
+
+#files span{
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+#pathConfigContainer {
+    height: 7%;
+    padding-left: 5px;
+}
+
+#addNewPath, #removeAllPaths, #pathConfigContainer select {
+    height: 100%;
+    width: 20%;
+    cursor: pointer;
+    border: 1px solid white;
+    color: white;
+    text-shadow: 0px 0px 20px black;
+    -webkit-text-stroke: 1px;
+    -webkit-text-stroke-color: white;
+    border-radius: 5%;
+    font-size: 3vw;
+}
+
+#pathConfigContainer select{
+    background: purple;
+}
+
+#addNewPath {
+    background: greenyellow;
+    
+}
+
+#removeAllPaths {
+    background: red;
+}
+
+#pathsDisplay {
+    height: 85%;
+    overflow-y: scroll;
+}
+
+#pathsDisplay::-webkit-scrollbar {
+    background: linear-gradient(to bottom, transparent, grey, grey, grey, transparent);
+    width: 10px;
+}
+
+#pathsDisplay::-webkit-scrollbar-thumb {
+    background: rgb(240, 139, 255);
+}
+
+.dropPathButton {
+    background: red;
+}
+
+#pathsDisplay button{
+    background: red;
+    margin: 5px;
+    border: 1px solid white;
+    color: white;
+    border-radius: 5%;
+    height: 30px;
+    width: 30px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+#pathsDisplay p{
+    font-size: 20px;
+}
+
+#captionAddBlock {
+    height: 10%;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    padding-left: 10px;
+}
+
+#captionAddBlock button{
+    all: unset;
+    width: 100px;
+    height: 60%;
+    align-self: center;
+    background: green;
+    color: white;
+    font-weight: bolder;
+    border: 1px solid white;
+    cursor: pointer;
+    margin-left: 20px;
+    text-align: center;
+
+    transition: height 0.1s ease, width 0.1s ease;
+}
+
+#captionAddBlock button:hover{
+    width: 110px;
+    height: 70%;
+}
+
+
+
+#captionHolder {
+    overflow-y: auto;
+    height: 480px;
+    font-size: 30px;
+}
+
+#captionHolder::-webkit-scrollbar {
+    background: linear-gradient(to bottom, transparent, grey, grey, grey, transparent);
+    width: 10px;
+}
+
+#captionHolder::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, transparent, rgb(240, 139, 255), rgb(240, 139, 255), rgb(240, 139, 255), transparent);
+}
+
+#captionHolder p{
+    margin: 5px;
+}
+
+#captionHolder button{
+    all: unset;
+    color: red;
+    cursor: pointer;
+    margin: 0 5px;
+    font-weight: bolder;
+}
+
+
+
+
+
+
+#firstPopupSettingBlock {
+    height: 50%;
+    margin: 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#firstPopupSettingBlock h2 {
+    letter-spacing: 2px;
+    font-family: quintessential;
+    margin: 0px;
+    margin-bottom: 10px;
+    text-decoration: underline;
+}
+
+#firstPopupSettingBlock p {
+    margin: 5px 0;
+}
+
+.firstBlockCol {
+    height: 100%;
+    padding: 10px;
+}
+
+
+
+
+
+
+
+.backToMenuModal {
+    flex-basis: 10%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.backToMenuModal button{
+    cursor: pointer;
+    height: 50px;
+    width: 200px;
+    margin: 10px;
+    border: 1px solid white;
+    color: white;
+    font-size: 30px;
+    text-shadow: 0px 0px 10px white;
+    background: linear-gradient(to bottom right, purple, black);
+
+    transition: letter-spacing 0.2s ease-out,  width 0.2s ease-out;
+}
+
+.backToMenuModal button:hover{
+    letter-spacing: 3px;
+    width: 220px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#fvContainer {
+    font-size: 20px;
+    height: 100vh;
+    padding: 1px;
+    overflow-y: auto;
+    font-family: quintessential;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#fvContainer a, #fvContainer a:visited {
+    color: cyan;
+}
+
+#fvContainer h1 {
+    text-align: center;
+    text-shadow: 0px 0px 20px white;
+    font-size: 45px;
+    margin: 20px 0px 0px 0px;
+}
+
+#fvContainer h2 {
+    color: rgba(255, 255, 255, 0);
+    text-align: center;
+    background: linear-gradient(to right, rgb(255, 157, 255), rgb(162, 99, 255));
+    background-clip: text;
+    position: relative;
+}
+
+#fvContainer h2::after {
+    content: 'Unfettered creativity';
+    -webkit-text-stroke-width: 5px;
+    filter: blur(2px);
+    color: white;
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    text-align: center;
+    width: 100%;
+    z-index: -1;
+}
+
+.fvBrick {
+    padding: 0px;
+    margin: 80px 0px;
+    z-index: 2;
+    position: relative;
+}
+
+.fvBrick p, .fvBrick h3{
+    font-family:'Times New Roman', Times, serif;
+    margin: 0 0;
+}
+
+.fvBrick h3 {
+    font-size: 30px;
+    padding: 5px;
+    text-decoration:underline;
+}
+
+.fvBrick p {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    margin: 1%;
+    border-radius: 15px;
+    position: relative;
+}
+
+.fvBrick p::after{
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    border-radius: 15px;
+    filter: blur(5px);
+    padding: 3px;
+    z-index: -1;
+}
+
+.optionFlexContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.flexOption {
+    height: 100%;
+    width: 30%;
+}
+
+
+/*==============================*/
+.borderOrange {
+    border: 3px solid rgb(255, 123, 0);
+}
+
+.borderOrange::after {
+    border: 3px solid rgb(255, 123, 0);
+}
+
+
+.borderRed {
+    border: 3px solid rgb(255, 0, 0);
+}
+
+.borderRed::after {
+    border: 3px solid rgb(255, 0, 0);
+}
+
+.borderCyan {
+    border: 3px solid rgb(0, 234, 255);
+}
+
+.borderCyan::after {
+    border: 3px solid rgb(0, 234, 255);
+}
+
+.borderPink {
+    border: 3px solid rgb(242, 0, 255);
+}
+
+.borderPink::after {
+    border: 3px solid rgb(242, 0, 255);
+}
+
+.borderPurple {
+    border: 3px solid rgb(132, 0, 255);
+}
+
+.borderPurple::after {
+    border: 3px solid rgb(132, 0, 255);
+}
+
+.borderBlue {
+    border: 3px solid rgb(43, 0, 255);
+}
+
+.borderBlue::after {
+    border: 3px solid rgb(43, 0, 255);
+}
