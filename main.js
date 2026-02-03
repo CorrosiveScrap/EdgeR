@@ -1,651 +1,468 @@
-const { app, ipcMain, Menu, Tray, BrowserWindow, screen, dialog, globalShortcut} = require('electron');
-const path = require('path');
+const { spawn } = require('child_process');
+const {app, BrowserWindow, ipcMain, Tray, Menu, Notification, dialog, globalShortcut } = require('electron')
 const fs = require('fs');
+const path = require('path');
 
-// Get rid of the default menu at the top of all windows
-Menu.setApplicationMenu(false);
-
-// Settings for the home screen
-function createWindow() {
-    const win = new BrowserWindow({
+let mainWindow;
+let mainWindowOpen = false;
+function createMainWindow() {
+    mainWindow = new BrowserWindow({
+        title: 'EdgR - Splash Screen',
         width: 700,
         height: 800,
-        //frame: false,
         resizable: false,
-        icon: path.join(__dirname, 'src/img/trayIcon.ico'),
+        autoHideMenuBar: true,
+        icon: path.join(__dirname, 'renderer', 'img', 'icon.ico'),
+
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            //devTools: true
+            preload: path.join(__dirname, "indexPreload.js")
         }
+    })
+
+    mainWindow.loadFile(path.join(__dirname, './renderer/index.html'))
+    mainWindowOpen = true;
+
+    mainWindow.on("close", () => {
+      console.log("closed");
+      mainWindowOpen = false;
     });
 
-    win.loadFile('src/index.html');
+    mainWindow.on("minimize", () => {
+      mainWindow.webContents.send("minimized")
+    })
+    mainWindow.on("restore", () => {
+      mainWindow.webContents.send("restored")
+    })
+    mainWindow.on("show", () => {
+      mainWindow.webContents.send("shown")
+    })
 }
 
-ipcMain.handle('capeditoropen', () => {
-    const win = new BrowserWindow({
-        width: 600,
-        height: 700,
-        //frame: false,
-        resizable: false,
-        icon: path.join(__dirname, 'src/img/trayIcon.ico'),
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            //devTools: true
-        }
-    });
+let allPopUps = []
+let windowsFade = 'true';
+let windowFadeTime = 5;
 
-    win.loadFile('src/caption-editor.html');
-});
-
-// Settings for the image popups
-function createImageWindow() {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.workAreaSize;
-
-    const scale = Math.floor(Math.random() * popupMaxSize) + popupMinSize;
-
-    const windowWidth = scale;
-    const windowHeight = scale;
-
-    const maxWidth = width - windowWidth;
-    const maxHeight = height - windowHeight;
-
-    const positionX = Math.floor(Math.random() * maxWidth);
-    const positionY = Math.floor(Math.random() * maxHeight);
-
-    const win2 = new BrowserWindow({
-        width: scale,
-        height: scale,
-        x: positionX,
-        y: positionY,
-        frame: false,
-        resizable: false,
-        alwaysOnTop: true,
+function createImagePopup() {
+    const popUpWindow = new BrowserWindow({
         skipTaskbar: true,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            devTools: false
-        }
-    });
-
-    win2.loadFile('src/image.html');
-
-    win2.on('minimize', () => {
-        win2.restore();
-    });
-}
-
-
-// Settings for the video popups
-function createVideoWindow() {
-
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.workAreaSize;
-
-    const scale = Math.floor(Math.random() * popupMaxSize) + popupMinSize;
-
-    const windowWidth = scale;
-    const windowHeight = scale;
-
-    const maxWidth = width - windowWidth;
-    const maxHeight = height - windowHeight;
-
-    const positionX = Math.floor(Math.random() * maxWidth);
-    const positionY = Math.floor(Math.random() * maxHeight);
-    
-
-    const win3 = new BrowserWindow({
-        width: scale,
-        height: scale,
-        x: positionX,
-        y: positionY,
+        x: 0,
+        y: 0,
+        height: 0,
+        width: 0,
         frame: false,
+        autoHideMenuBar: true,
         resizable: false,
-        alwaysOnTop: true,
-        skipTaskbar: true,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            devTools: false
-        }
-    });
+        show: false,
+        focusable: false,
+    })
 
-    // Load the image file
-    win3.loadFile('src/video.html');
+    popUpWindow.loadFile(path.join(__dirname, "renderer/image.html"))
 
-    // When minimized, immediately restore the window
-    win3.on('minimize', () => {
-        win3.restore();
-    });
+    popUpWindow.once("ready-to-show", () => {
+      popUpWindow.setAlwaysOnTop(true, 'screen-saver')
+      popUpWindow.showInactive();
+    })
+
+    allPopUps.push(popUpWindow)
+
+    console.log(windowFadeTime)
+
+    if (windowsFade == 'true') {
+      setTimeout(() => {
+      popUpWindow.destroy()
+    }, windowFadeTime * 1000)
+    }
 }
 
-
-function createAudioWindow() {
-
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const { width, height } = primaryDisplay.workAreaSize;
-
-    const scale = Math.floor(Math.random() * popupMaxSize) + popupMinSize;
-
-    const windowWidth = scale;
-    const windowHeight = scale;
-
-    const maxWidth = width - windowWidth;
-    const maxHeight = height - windowHeight;
-
-    const positionX = Math.floor(Math.random() * maxWidth);
-    const positionY = Math.floor(Math.random() * maxHeight);
-    
-
-    const win4 = new BrowserWindow({
-        width: scale,
-        height: scale,
-        x: positionX,
-        y: positionY,
+function createVideoPopup() {
+  const popUpWindow = new BrowserWindow({
+        skipTaskbar: true,
+        x: 0,
+        y: 0,
+        height: 0,
+        width: 0,
         frame: false,
+        autoHideMenuBar: true,
         resizable: false,
-        alwaysOnTop: true,
-        skipTaskbar: true,
-        show: showaudio,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            devTools: false
-        }
-    });
+        show: false,
+        focusable: false,
+    })
 
-    win4.loadFile('src/audio.html');
+    popUpWindow.loadFile(path.join(__dirname, "renderer/video.html"))
 
-    // When minimized, immediately restore the window
-    win4.on('minimize', () => {
-        win4.restore();
-    });
+    popUpWindow.once("ready-to-show", () => {
+      popUpWindow.setAlwaysOnTop(true, 'screen-saver')
+      popUpWindow.showInactive();
+    })
+
+    allPopUps.push(popUpWindow)
+
+    if (windowsFade == 'true') {
+      setTimeout(() => {
+      popUpWindow.destroy()
+    }, windowFadeTime * 1000)
+    }
 }
 
-
-function createblockedWindow() {
-
-    const win5 = new BrowserWindow({
-        kiosk: true,
+let limitAudioWindows = 'true'
+let amountOfAudioWindows = 0;
+function createAudioPopup() {
+  const popUpWindow = new BrowserWindow({
+        skipTaskbar: true,
+        x: 0,
+        y: 0,
+        height: 0,
+        width: 0,
         frame: false,
+        autoHideMenuBar: true,
+        resizable: false,
+        show: false,
+        focusable: false,
+    })
+
+    popUpWindow.loadFile(path.join(__dirname, "renderer/audio.html"))
+
+    popUpWindow.once("ready-to-show", () => {
+      popUpWindow.setAlwaysOnTop(true, 'screen-saver')
+      popUpWindow.showInactive();
+    })
+
+    allPopUps.push(popUpWindow)
+
+    if (windowsFade == 'true') {
+      setTimeout(() => {
+        popUpWindow.close()
+      }, windowFadeTime * 1000)
+    }
+
+    popUpWindow.once("closed", () => {
+      amountOfAudioWindows--
+    })
+}
+
+function createPromptPopup() {
+  const popUpWindow = new BrowserWindow({
         skipTaskbar: true,
+        x: 0,
+        y: 0,
+        height: 200,
+        width: 200,
+        frame: false,
+        autoHideMenuBar: true,
+        resizable: false,
+        show: false,
+        focusable: true,
+
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            devTools: false
+          devTools: true
         }
-    });
+    })
 
-    win5.loadFile('src/blocked.html');
+    popUpWindow.loadFile(path.join(__dirname, "renderer/prompt.html"))
 
-    // Must be set here because otherwise the taskbar is visible with kiosk
-    win5.setAlwaysOnTop(true);
+    popUpWindow.once("ready-to-show", () => {
+      popUpWindow.setAlwaysOnTop(true, 'screen-saver')
+      popUpWindow.show();
+    })
 
-    // When minimized, immediately restore the window
-    win5.on('minimize', () => {
-        win5.restore();
-    });
+    allPopUps.push(popUpWindow)
 }
 
-
-// Build the tray options and open index.html by default
-app.whenReady().then(() => {
-    createWindow();
-
-    let tray;
-    tray = new Tray(path.join(__dirname, 'src', 'img', 'trayIcon.ico'));
-    tray.setToolTip('EdgeR');
-    let trayTemplate = [
-        {
-            label: 'Splash screen',
-            click: createWindow
-        },
-        { 
-            label: 'Freeze' ,
-            click: () => {
-                clearInterval(clock)
-            }
-        },
-        { 
-             label: 'Resume' ,
-             click: () => {
-                clearInterval(clock)
-                startClock()
-             }
-        },
-        // { 
-        //     label: 'Clear screen' ,
-        //     click: () => {
-        //     }
-        // },
-        {
-            label: 'Quit',
-            click: app.quit
-        }
-    ];
-
-    let contextMenu = Menu.buildFromTemplate(trayTemplate);
-    tray.setContextMenu(contextMenu);
-
-    globalShortcut.register('F11', () => {
-        console.log('Full screen is disabled');
-    });
-});
-
-
-
-
-
-// This stops windows from automatically closing the app when there are no open windows
-app.on('window-all-closed', () => {
-});
-
-
-
-
-// Handle the quit button in index.html
-ipcMain.handle('quit-app', () => {
-    globalShortcut.unregisterAll();
-    app.quit();
-});
-
-
-
-// Open and grab shit form focking folder omfg sadalisujdja
-ipcMain.on('getimages', (event) => {
-    console.log('arrived')
-
-    dialog.showOpenDialog({
-        properties: ['openDirectory'],
-    }).then((result) => {
-        if (!result.canceled) {
-            const folderPath = result.filePaths[0]; // Get the selected folder path
-
-            // Now, you can read the folder and filter out documents
-            fs.readdir(folderPath, (err, files) => {
-                if (err) {
-                    console.error('Error reading folder:', err);
-                    return;
-                }
-
-                const documents = files.filter((file) => {
-                    // You can adjust this filter to include the file types you consider as documents.
-                    return file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.webp') || file.endsWith('.gif') || file.endsWith('.tiff') || file.endsWith('.raw');
-                });
-
-                //console.log(documents);
-                //console.log(reply)
-
-                event.sender.send('getimages-reply', documents, folderPath);
-            });
-        } else {
-            console.log('Canceled images')
-        }
-    });
-});
-
-
-ipcMain.on('getvideos', (event) => {
-    console.log('arrived')
-
-    dialog.showOpenDialog({
-        properties: ['openDirectory'],
-    }).then((result) => {
-        if (!result.canceled) {
-            const folderPath = result.filePaths[0]; // Get the selected folder path
-
-            // Now, you can read the folder and filter out documents
-            fs.readdir(folderPath, (err, files) => {
-                if (err) {
-                    console.error('Error reading folder:', err);
-                    return;
-                }
-
-                const documents = files.filter((file) => {
-                    // You can adjust this filter to include the file types you consider as documents.
-                    return file.endsWith('.mp4') || file.endsWith('.mov') || file.endsWith('.mkv');
-                });
-
-                //console.log(documents);
-                //console.log(reply)
-
-                event.sender.send('getvideos-reply', documents, folderPath);
-            });
-        } else {
-            console.log('Canceled videos')
-        }
-    });
-});
-
-
-ipcMain.on('getaudios', (event) => {
-    console.log('arrived')
-
-    dialog.showOpenDialog({
-        properties: ['openDirectory'],
-    }).then((result) => {
-        if (!result.canceled) {
-            const folderPath = result.filePaths[0]; // Get the selected folder path
-
-            // Now, you can read the folder and filter out documents
-            fs.readdir(folderPath, (err, files) => {
-                if (err) {
-                    console.error('Error reading folder:', err);
-                    return;
-                }
-
-                const documents = files.filter((file) => {
-                    // You can adjust this filter to include the file types you consider as documents.
-                    return file.endsWith('.mp4') || file.endsWith('.mov') || file.endsWith('.mkv') || file.endsWith('.mp3');
-                });
-
-                //console.log(documents);
-                //console.log(reply)
-
-                event.sender.send('getaudios-reply', documents, folderPath);
-            });
-        } else {
-            console.log('Canceled audio')
-        }
-    });
-});
-
-
-
-
-
-
-// Get and apply chosen settings + loop that creates the popups
-let clock
-var timer = 1000
-var randtimer01
-var randtimer02
-var randomtime
-var countInMs
-
-var images
-var videos
-var audio
-
-var createAmount
-var showaudio
-
-ipcMain.handle('activeOn', () => {
-    clearInterval(clock)
-
-    if (randomtime == true) {
-        temp = Math.floor(Math.random() * (parseInt(randtimer02) - parseInt(randtimer01) + 1)) + parseInt(randtimer01);
-
-        if (countInMs == false) {
-            timer = temp * 1000
-        }
-        console.log('Time before next popup: ' + timer)
-    }
-
-    switch (createAmount) {
-        case 3:
-            if (images == true) {
-                createImageWindow()
-            }
-            if (videos == true) {
-                createVideoWindow()
-            }
-            if (audio == true) {
-                createAudioWindow()
-            }
-        break;
-        case 1:
-            temp2 = Math.floor(Math.random() * 3) + 1
-            switch (temp2) {
-                case 1:
-                    if (images == true) {
-                        createImageWindow()
-                    }
-                    if (images == false && videos == true) {
-                        createVideoWindow()
-                    }
-                    if (images == false && videos == false) {
-                        createAudioWindow()
-                    }
-                break;
-                case 2:
-                    if (videos == true) {
-                        createVideoWindow()
-                    }
-                    if (videos == false && images == true) {
-                        createImageWindow()
-                    }
-                    if (videos == false && images == false) {
-                        createAudioWindow()
-                    }
-                break;
-                case 3:
-                    if (audio == true) {
-                        createAudioWindow()
-                    }
-                    if (audio == false && images == true) {
-                        createImageWindow()
-                    }
-                    if (audio == false && images == false) {
-                        createVideoWindow()
-                    }
-                break;
-            }
-        break;
-        default:
-            tempar = []
-            if (images == true) {
-                tempar.push('images')
-            }
-            if (videos == true) {
-                tempar.push('videos')
-            }
-            if (audio == true) {
-                tempar.push('audio')
-            }
-
-            for (let i = 0; i < createAmount; i++) {
-                temp3 = tempar[Math.floor(Math.random() * tempar.length)]
-                switch (temp3) {
-                    case 'images':
-                        createImageWindow()
-                    break;
-                    case 'videos':
-                        createVideoWindow()
-                    break;
-                    case 'audio':
-                        createAudioWindow()
-                    break;
-                }
-            }
-        break;
-    }
-
-    startClock()
-});
-
-var popupMinSize
-var popupMaxSize
-
-ipcMain.on('updateSettings', (event, frequency, frequency02, frequency03, randomFrequency, useMs, imageCreate, videoCreate, audioCreate, createType, audioDisplay, minSize, maxSize) => {
-    if (useMs == false) {
-        timer = frequency * 1000;
-    } else {
-        timer = frequency
-    }
-    randtimer01 = frequency02
-    randtimer02 = frequency03
-    randomtime = randomFrequency
-    countInMs = useMs
-
-    images = imageCreate
-    videos = videoCreate
-    audio = audioCreate
-    popupMinSize = minSize
-    popupMaxSize = maxSize
-
-    if (audioDisplay == 'true') {
-        showaudio = false
-    } else {
-        showaudio = true
-    }
-
-    createAmount = createType
-    console.log('Updated settings: \nFrequency: ', timer + '\nImages: ' + imageCreate + '\nVideos: ' + videoCreate + '\nAudio: ' + audioCreate + '\nAmount to create: ' + createType + '\nMin size: ' + minSize + '\nMax size: ' + maxSize);
-});
-
-function startClock() {
-    clock = setInterval( function() {
-
-        switch (createAmount) {
-            case 3:
-                if (images == true) {
-                    createImageWindow()
-                }
-                if (videos == true) {
-                    createVideoWindow()
-                }
-                if (audio == true) {
-                    createAudioWindow()
-                }
-            break;
-            case 1:
-                temp2 = Math.floor(Math.random() * 3) + 1
-                switch (temp2) {
-                    case 1:
-                        if (images == true) {
-                            createImageWindow()
-                        }
-                        if (images == false && videos == true) {
-                            createVideoWindow()
-                        }
-                        if (images == false && videos == false) {
-                            createAudioWindow()
-                        }
-                    break;
-                    case 2:
-                        if (videos == true) {
-                            createVideoWindow()
-                        }
-                        if (videos == false && images == true) {
-                            createImageWindow()
-                        }
-                        if (videos == false && images == false) {
-                            createAudioWindow()
-                        }
-                    break;
-                    case 3:
-                        if (audio == true) {
-                            createAudioWindow()
-                        }
-                        if (audio == false && images == true) {
-                            createImageWindow()
-                        }
-                        if (audio == false && images == false) {
-                            createVideoWindow()
-                        }
-                    break;
-                }
-            break;
-            default:
-                tempar = []
-                if (images == true) {
-                    tempar.push('images')
-                }
-                if (videos == true) {
-                    tempar.push('videos')
-                }
-                if (audio == true) {
-                    tempar.push('audio')
-                }
-    
-                for (let i = 0; i < createAmount; i++) {
-                    temp3 = tempar[Math.floor(Math.random() * tempar.length)]
-                    switch (temp3) {
-                        case 'images':
-                            createImageWindow()
-                        break;
-                        case 'videos':
-                            createVideoWindow()
-                        break;
-                        case 'audio':
-                            createAudioWindow()
-                        break;
-                    }
-                }
-            break;
-        }
-
-        if (randomtime == true) {
-            temp = Math.floor(Math.random() * (parseInt(randtimer02) - parseInt(randtimer01) + 1)) + parseInt(randtimer01);
-            if (countInMs == false) {
-                timer = temp * 1000
-                console.log('Time before next popup: ' + timer)
-            }
-            clearInterval(clock)
-            startClock()
-        }
-    }, timer)
-}
-
-// This is a command that I used for debugging its connected to a button in index.html thats commented out
-ipcMain.handle('test', () => {
-    for (let i = 0; i < 1; i++) {
-        createVideoWindow()
-        //createImageWindow()
-        //createAudioWindow()
-
-        //createblockedWindow()
-    }
-});
-
-
-
-//Deal with discord rich presence 
-const clientId = '1162831890051514401';
-const DiscordRPC = require('discord-rpc');
-const RPC = new DiscordRPC.Client({ transport: 'ipc'});
-
-var discordDetails
-var discordState
-
-DiscordRPC.register(clientId);
-
-async function setActivity() {
-    //console.log('Setting actuvity')
-    RPC.setActivity({
-        details: discordDetails,
-        state: discordState,
-        startTimestamp: Date.now(),
-        largeImageKey: 'default',
-        //largeImageText: 'Random image',
-        //smallImageKey: 'default',
-        //smallImageText: 'Other random image',
-        instance: false,
-        // buttons: [
-        //     {
-        //         label: `Button01`,
-        //         url: ``
-        //     },
-        //     {
-        //         label: `Button02`,
-        //         url: ``
-        //     },
-        // ]
-    });
-};
-
-ipcMain.on('discordSettings', (event, display, discDetails, discState) => {
-    discordDisplay = display
-    discordDetails = discDetails
-    discordState = discState
-    if (discordDisplay == 'true') {
-        setActivity()
-    } else {
-        RPC.clearActivity();
-    }
-});
-
-RPC.on('ready', async () => {
-    setActivity()
+ipcMain.handle('start', () => {
+  startGoonLoop()
 })
 
-RPC.login({ clientId }).catch(err => console.error(err))
+ipcMain.handle('exit', () => {
+    app.exit();
+})
+
+ipcMain.handle("addNewPath", async(event, type) => {
+  const result = await dialog.showOpenDialog({
+    properties: ["openDirectory"],
+  });
+
+  if (result.canceled) return null;
+
+  const folderPath = result.filePaths[0];
+
+  const entries = fs.readdirSync(folderPath, { withFileTypes: true });
+  let images = [];
+
+  let allowedExtentions = ''
+
+  switch (type) {
+    case "images":
+      allowedExtentions = /\.(png|jpe?g|webp|gif)$/i;
+      break;
+    case "videos":
+      allowedExtentions = /\.(mp4|mkv|mov|wav|avi)$/i;
+      break;
+    case "audio":
+      allowedExtentions = /\.(mp3|mp4|mkv|mov|wav|avi)$/i;
+      break;
+  }
+
+  let skippedDirs = 0;
+  let skippedFiles = 0;
+
+  for (const entry of entries) {
+    const fullPath = path.join(folderPath, entry.name);
+    if (entry.isDirectory()) {
+      console.log('Skipped: ', entry.name, " - Is dir")
+      skippedDirs++
+      // Recurse into subfolders
+      //images = images.concat(getAllImages(fullPath));
+    } else if(allowedExtentions.test(entry.name)) {
+      // if (/\.(png|webp)$/i.test(entry.name)) {
+      //   images.push(fullPath);
+      // }
+      images.push(fullPath);
+    } else {
+      console.log('Skipped: ', entry.name, ' - Bad format')
+      skippedFiles++
+    }
+  }
+
+  new Notification({
+      title: "Media overlooked",
+      body: `Skipped over ${skippedDirs} directories and ${skippedFiles} files that did not meet compatable formats`,
+    }).show();
+
+  
+  const returnPackage = {
+    hostDir: folderPath,
+    insides: images,
+  };
+
+  console.log(returnPackage);
+  return returnPackage;
+});
+
+ipcMain.handle('test', () => {
+    createImagePopup();
+    createVideoPopup();
+    createAudioPopup();
+    createPromptPopup();
+})
+
+const trayTemplate = [
+  // {
+  //   label: "test",
+  //   click: () => {
+  //     //createImagePopup();
+  //     createVideoPopup();
+  //     //createAudioPopup();
+  //   },
+  // },
+  {
+    label: "Spash Screen",
+    click: () => {
+      if (!mainWindowOpen) {
+        createMainWindow();
+      } else {
+        new Notification({
+          title: "Splash Screen is already open",
+          body: "Multiple instances of splash screen are not supported. Please close the previous window to open a new open.",
+        }).show();
+      }
+    },
+  },
+  {
+    label: "Freeze",
+    click: () => {
+      clearInterval(mainLoop);
+    },
+  },
+  {
+    label: "Resume",
+    click: () => {
+      startGoonLoop(mainLoop);
+    },
+  },
+  {
+    label: "Clear screen",
+    click: () => {
+      allPopUps.forEach((popup) => {
+        if (popup) {
+          popup.destroy();
+        }
+      });
+      allPopUps = [];
+    },
+  },
+  {
+    label: "Exit",
+    click: () => {
+      app.exit();
+    },
+  },
+];
+
+app.whenReady().then(() => {
+  // const contentFetchMethod = spawn('cmd', ["/c", "contentGrab.bat"], {
+  //   stdio: "inherit"
+  // })
+  
+  // contentFetchMethod.on("close", (code) => {
+  //   console.log(`Content fetcher exited with code: ${code}`);
+  // });
+
+  const tray = new Tray(path.join(__dirname, "renderer/img/icon.ico"))
+  tray.setToolTip('EdgR')
+  tray.setContextMenu(Menu.buildFromTemplate(trayTemplate))
+  createMainWindow();
+
+  globalShortcut.register("Control+Shift+e", () => {
+    app.exit();
+  });
+
+  globalShortcut.register("Control+Shift+f", () => {
+    clearInterval(mainLoop);
+  });
+
+  globalShortcut.register("Control+Shift+r", () => {
+    startGoonLoop(mainLoop);
+  });
+
+  globalShortcut.register("Control+Shift+c", () => {
+    allPopUps.forEach((popup) => {
+        if (popup) {
+          popup.destroy();
+        }
+      });
+      allPopUps = [];
+  })
+});
+
+
+app.on("window-all-closed", () => {
+  console.log("Running in the background");
+});
+
+let randomDonwTime = false;
+let downTime = 2;
+let maxDownTime = 5;
+
+let imageChance = 100;
+let videoChance = 0;
+let audioChance = 0;
+let promptChance = 0;
+let notifcationChance = 0;
+
+let chanceTable = [];
+
+let imageAmount = 1;
+let videoAmount = 1;
+let audioAmount = 1;
+let promptAmount = 1;
+let notificationAmount = 1;
+
+ipcMain.handle('setSettings', (event, randomdt, dt, mdt, imgChance, vidChance, audChance, pmtChance, notChance, imgAmount, vidAmount, audAmount, pmtAmount, notAmount, fade, fadeTime, audCap) => {
+  if (randomdt) {randomDonwTime = randomdt}
+  if (dt) {downTime = dt}
+  if (mdt) {maxDownTime = mdt}
+
+  if (imgChance) {imageChance = imgChance}
+  if (vidChance) {videoChance = vidChance}
+  if (audChance) {audioChance = audChance}
+  if (pmtChance) {promptChance = pmtChance}
+  if (notChance) {notifcationChance = notChance}
+
+  chanceTable = [
+    ["image", imageChance],
+    ["video", videoChance],
+    ["audio", audioChance],
+    ["prompt", promptChance],
+    ["notification", notifcationChance],
+  ];
+
+  if (imgAmount) {imageAmount = imgAmount}
+  if (vidAmount) {videoAmount = vidAmount}
+  if (audAmount) {audioAmount = audAmount}
+  if (pmtAmount) {promptAmount = pmtAmount}
+  if (notAmount) {notificationAmount = notAmount}
+
+  if (fade) {windowsFade = fade}
+  if (fadeTime) {windowFadeTime = fadeTime}
+
+  if (audCap) {limitAudioWindows = audCap}
+
+  console.log(imageChance, videoChance, audioChance)
+});
+
+
+
+
+
+
+let mainLoop;
+function startGoonLoop() {
+  createMedia();
+
+  mainLoop = setInterval(() => {
+
+    if (randomDonwTime === 'true') {
+      const wait = Math.floor(Math.random() * maxDownTime)
+      console.log('Random run')
+
+      setTimeout(() => {
+        createMedia();
+      }, wait * 1000)
+
+    } else {
+      createMedia();
+    }
+    
+  }, downTime * 1000);
+
+  console.log('Doawn Time: ' + downTime)
+}
+
+function createMedia() {
+
+  chanceTable.forEach((item) => {
+    const rng = Math.floor(Math.random() * 100);
+    let passed = false;
+    if (rng < item[1]) {
+      passed = true
+      switch (item[0]) {
+        case 'image':
+          for (let i = 0; i < imageAmount; i++) {
+            createImagePopup();
+          }
+        break;
+        case 'video':
+          for (let i = 0; i < videoAmount; i++) {
+            createVideoPopup();
+          }
+        break;
+        case 'audio':
+          if (limitAudioWindows == 'true' && amountOfAudioWindows > 1) {
+            return;
+          } else {
+            for (let i = 0; i < audioAmount; i++) {
+              createAudioPopup();
+              amountOfAudioWindows++
+            }
+          }
+        break;
+        case 'prompt':
+          for (let i = 0; i < promptAmount; i++) {
+            createPromptPopup();
+          }
+        break;
+        case 'notification':
+          for (let i = 0; i < notificationAmount; i++) {
+            console.log('hi')
+            new Notification({
+              title: 'Notification',
+              body: 'This is a test notification from the main process'
+            }).show()
+          }
+        break;
+      }
+    }
+
+    console.log(`${item[0]}: Passed = ${passed} | Pass chance = ${item[1]} | RNG value = ${rng}`)
+  });
+}
